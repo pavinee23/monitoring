@@ -830,8 +830,8 @@ const styles: { [k: string]: React.CSSProperties } = {
 		marginBottom: 40
 	},
 	logoCircle: {
-		width: 100,
-		height: 100,
+		width: 140,
+		height: 140,
 		borderRadius: '50%',
 		background: 'linear-gradient(135deg, #ffffff 0%, #f0fdf4 100%)',
 		margin: '0 auto 20px',
@@ -844,7 +844,7 @@ const styles: { [k: string]: React.CSSProperties } = {
 			0 0 0 6px rgba(16, 185, 129, 0.08)
 		`,
 		animation: 'float 3s ease-in-out infinite',
-		padding: 10,
+		padding: 12,
 		overflow: 'hidden',
 		border: '2px solid rgba(16, 185, 129, 0.2)'
 	},
