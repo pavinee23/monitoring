@@ -11,6 +11,9 @@ type Machine = {
   ksave?: string
   powerValue?: number
   location?: string
+  ipAddress?: string
+  beforeMeterNo?: string
+  metricsMeterNo?: string
 }
 function MachineCard({ m, services, selectedSiteFilter }: { m: Machine; services?: any; selectedSiteFilter?: string }) {
   const [now, setNow] = useState<Date>(new Date())
@@ -24,6 +27,32 @@ function MachineCard({ m, services, selectedSiteFilter }: { m: Machine; services
   const [deviceSecondsAgo, setDeviceSecondsAgo] = useState<number | null>(null)
   const [deviceReportingOk, setDeviceReportingOk] = useState<boolean | null>(null)
   const router = useRouter()
+
+  // Function to save device metrics to database
+  const saveDeviceMetrics = async () => {
+    try {
+      await fetch('/api/device-metrics', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          ksaveID: m.ksave || m.id,
+          deviceName: m.name,
+          seriesName: seriesName || m.ksave || m.name,
+          seriesNo: seriesNo || localSeriesNo,
+          powerValue: devicePowerValue,
+          location: deviceLocation || m.location,
+          status: m.status,
+          secondsAgo: deviceSecondsAgo,
+          reportingOk: deviceReportingOk,
+          ipAddress: m.ipAddress,
+          beforeMeterNo: m.beforeMeterNo,
+          metricsMeterNo: m.metricsMeterNo
+        })
+      })
+    } catch (e) {
+      console.error('Failed to save device metrics:', e)
+    }
+  }
 
   useEffect(() => {
     const iv = setInterval(() => setNow(new Date()), 1000)
@@ -94,8 +123,16 @@ function MachineCard({ m, services, selectedSiteFilter }: { m: Machine; services
     return () => { mounted = false }
   }, [m.id, m.ksave])
 
+  // Save metrics to database whenever they change
+  useEffect(() => {
+    if (seriesName || seriesNo || devicePowerValue || deviceLocation || deviceReportingOk !== null) {
+      saveDeviceMetrics()
+    }
+  }, [seriesName, seriesNo, devicePowerValue, deviceLocation, deviceReportingOk, deviceSecondsAgo])
+
   // Ensure a stable 10-digit series number per device when Influx doesn't provide one.
   useEffect(() => {
+    
     try {
       const idKey = (m.ksave || m.id || '').toString()
       if (!idKey) return
@@ -131,6 +168,15 @@ function MachineCard({ m, services, selectedSiteFilter }: { m: Machine; services
             Site: {deviceLocation ?? m.location ?? (selectedSiteFilter && selectedSiteFilter !== 'All' ? selectedSiteFilter : '—')}
           </div>
           <div className="machine-sub" style={{ marginTop: 6 }}>{now.toLocaleString()}</div>
+          <div className="machine-sub">
+            IP: {m.ipAddress || (m.ksave ? `${m.ksave.toLowerCase()}.local` : '—')}
+          </div>
+          <div className="machine-sub">
+            Before Meter No: {m.beforeMeterNo ?? '—'}
+          </div>
+          <div className="machine-sub">
+            Metrics Meter No: {m.metricsMeterNo ?? '—'}
+          </div>
         </div>
 
         <div className={"status-pill " + (m.status === 'OK' ? 'ok' : (m.status === 'Warning' ? 'warn' : ''))}>
@@ -140,7 +186,7 @@ function MachineCard({ m, services, selectedSiteFilter }: { m: Machine; services
 
       <div className="machine-info-row">
         <div className="machine-info">
-          <div className="label">Series name:</div>
+          <div className="label">K-Save ID:</div>
           <div className="value">{(seriesName ?? m.ksave ?? m.name) ?? ''}</div>
         </div>
         <div className="machine-info">
@@ -152,28 +198,34 @@ function MachineCard({ m, services, selectedSiteFilter }: { m: Machine; services
   <div className="machine-actions" style={{ display: 'flex', gap: 8, flexWrap: 'wrap', alignItems: 'center' }}>
         <button
           className="k-btn k-btn-ghost machine-action-btn"
-          style={{ flex: '0 0 auto', padding: '6px 10px', fontSize: 13, width: 'auto', minWidth: 0, whiteSpace: 'nowrap' }}
-          onClick={() => router.push('/monitor/Monitor-Power_Before')}
+          style={{ flex: '0 0 auto', padding: '8px 16px', fontSize: 16, width: 'auto', minWidth: 0, whiteSpace: 'nowrap', fontWeight: 600 }}
+          onClick={() => {
+            const deviceId = (m.ksave || m.id || '').toUpperCase()
+
+            // KSave01 uses Node-RED Dashboard
+            if (deviceId === 'KSAVE01') {
+              window.open('https://unconsumptive-nonexcitably-bobbye.ngrok-free.dev/ui', '_blank')
+            } else {
+              // Other devices use new monitoring page
+              router.push(`/device-monitoring?device=${encodeURIComponent(m.ksave || m.id || '')}`)
+            }
+          }}
         >
-          Monitor Power Before
-        </button>
-        <button
-          className="k-btn k-btn-ghost machine-action-btn"
-          style={{ flex: '0 0 auto', padding: '6px 10px', fontSize: 13, width: 'auto', minWidth: 0, whiteSpace: 'nowrap' }}
-          onClick={() => router.push('/monitor/Monitor-Power_Metrics')}
-        >
-          Monitor Power Metrics
+          📊 Monitoring
         </button>
         <button
           className="k-btn k-btn-ghost machine-action-btn small"
-          style={{ padding: '6px 10px', fontSize: 13, width: 'auto', minWidth: 0, whiteSpace: 'nowrap' }}
-          onClick={() => router.push('/reports')}
+          style={{ padding: '6px 10px', fontSize: 16, width: 'auto', minWidth: 0, whiteSpace: 'nowrap' }}
+          onClick={() => {
+            const deviceId = m.ksave || m.id || ''
+            router.push(`/reports?device=${encodeURIComponent(deviceId)}`)
+          }}
         >
           Report Carbon
         </button>
         <button
           className="k-btn k-btn-ghost machine-action-btn small"
-          style={{ padding: '6px 10px', fontSize: 13, width: 'auto', minWidth: 0, whiteSpace: 'nowrap' }}
+          style={{ padding: '6px 10px', fontSize: 16, width: 'auto', minWidth: 0, whiteSpace: 'nowrap' }}
           onClick={() => {
             const id = m.ksave || m.id || ''
             // navigate to analytics page and pass device id as query param
@@ -187,11 +239,11 @@ function MachineCard({ m, services, selectedSiteFilter }: { m: Machine; services
       <div style={{ display: 'flex', gap: 12, marginTop: 10, alignItems: 'center' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 8 }} title={deviceSecondsAgo != null ? `Last point ${deviceSecondsAgo} seconds ago` : (deviceReportingOk === true ? 'Connected' : 'Disconnected')}>
           <div style={{ width: 10, height: 10, borderRadius: 6, background: deviceReportingOk === true ? '#10B981' : '#EF4444' }} />
-          <div style={{ fontSize: 14, color: '#374151' }}>Telegraf</div>
+          <div style={{ fontSize: 16, color: '#374151' }}>Telegraf</div>
         </div>
         <div style={{ display: 'flex', alignItems: 'center', gap: 8 }} title={deviceSecondsAgo != null ? `Last point ${deviceSecondsAgo} seconds ago` : (deviceReportingOk === true ? 'Connected' : 'Disconnected')}>
           <div style={{ width: 10, height: 10, borderRadius: 6, background: deviceReportingOk === true ? '#10B981' : '#EF4444' }} />
-          <div style={{ fontSize: 14, color: '#374151' }}>Grafana</div>
+          <div style={{ fontSize: 16, color: '#374151' }}>Grafana</div>
         </div>
       </div>
     </div>
@@ -216,6 +268,30 @@ export default function SitesPage() {
   const [user, setUser] = useState<string | null>(null)
   const [services, setServices] = useState<any | null>(null)
   const [locationsFromInflux, setLocationsFromInflux] = useState<string[] | null>(null)
+  const [devicesData, setDevicesData] = useState<any[]>([])
+
+  // Fetch devices with IP addresses from database (real-time polling every 3 seconds)
+  useEffect(() => {
+    let mounted = true
+    async function fetchDevices() {
+      try {
+        const res = await fetch('/api/devices')
+        if (!res.ok) return
+        const body = await res.json()
+        if (mounted && body.devices) {
+          setDevicesData(body.devices)
+        }
+      } catch (e) {
+        console.error('Failed to fetch devices:', e)
+      }
+    }
+    fetchDevices()
+    const interval = setInterval(fetchDevices, 3000) // Poll every 3 seconds for real-time updates
+    return () => { 
+      mounted = false
+      clearInterval(interval)
+    }
+  }, [])
 
   // poll service status every 5s
   useEffect(() => {
@@ -254,27 +330,34 @@ export default function SitesPage() {
   }, [])
 
   useEffect(() => {
-    // load demo machines (in real app fetch from API)
-    const demo: Machine[] = [
-      { id: 'Ksave01', name: 'KSave01', status: 'OK', ksave: 'KSAVE01', location: 'Site A' },
-      { id: 'Ksave02', name: 'KSave02', status: 'OK',  ksave: 'KSAVE02', location: 'Site B' },
-      { id: 'Ksave03', name: 'KSave03', status: 'Warning', ksave: 'KSAVE03', location: 'Site E' },
-      { id: 'Ksave04', name: 'KSave04', status: 'OK', ksave: 'KSAVE04', location: 'Site C' },
-      { id: 'Ksave05', name: 'KSave05', status: 'OK', ksave: 'KSAVE05', location: 'Site D' },
-    ]
-    setMachines(demo)
+    if (devicesData.length === 0) return
+    
+    // Load machines from database with real-time data
+    const machines = devicesData.map(device => {
+      // Map database status: ON -> OK, OFF -> Warning
+      const status = device.status === 'ON' ? 'OK' : device.status === 'OFF' ? 'Warning' : 'OK'
+      
+      return {
+        id: device.deviceName,
+        name: device.deviceName,
+        status: status,
+        ksave: device.ksaveID,
+        location: device.location,
+        ipAddress: device.ipAddress,
+        beforeMeterNo: device.beforeMeterNo,
+        metricsMeterNo: device.metricsMeterNo
+      }
+    })
+    
+    setMachines(machines)
     try {
       const u = localStorage.getItem('k_system_user')
       setUser(u)
     } catch (_) {}
-  }, [])
+  }, [devicesData])
 
   function handleOpenAllBefore() {
-    router.push('/monitor/Monitor-Power_Before')
-  }
-
-  function handleOpenAllMetrics() {
-    router.push('/monitor/Monitor-Power_Metrics')
+    router.push('/monitor/Compare-Monitoring')
   }
 
   // filters and sorting
@@ -333,9 +416,23 @@ export default function SitesPage() {
             <ServiceCard name="Telegraf" status={services?.telegraf?.ok} />
             <ServiceCard name="MQTT" status={services?.mqtt?.ok} />
           </div>
-          <button className="k-btn k-btn-primary crisp-text" onClick={handleOpenAllBefore} style={{ background: '#2563eb', color: '#fff', padding: '10px 16px', borderRadius: 6, border: 0, fontSize: 18 }}>Open All Monitor — Power Before</button>
-          <button className="k-btn k-btn-primary crisp-text" onClick={handleOpenAllMetrics} style={{ background: '#2563eb', color: '#fff', padding: '10px 16px', borderRadius: 6, border: 0, fontSize: 18 }}>Open All Monitor — Power Metrics</button>
-        
+          <button
+            className="k-btn k-btn-primary crisp-text"
+            onClick={handleOpenAllBefore}
+            style={{
+              background: 'linear-gradient(135deg, #2563eb, #1d4ed8)',
+              color: '#fff',
+              padding: '12px 24px',
+              borderRadius: 8,
+              border: 0,
+              fontSize: 18,
+              fontWeight: 600,
+              boxShadow: '0 4px 12px rgba(37, 99, 235, 0.4)'
+            }}
+          >
+            📊 Compare Monitoring
+          </button>
+
         </div>
       </header>
 

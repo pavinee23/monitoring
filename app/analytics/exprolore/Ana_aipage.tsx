@@ -132,95 +132,81 @@ export default function AnaAIPage(): React.ReactElement {
   }, [series, realtime])
 
   return (
-    <main className="p-4">
-      <h1 className="text-xl font-semibold mb-3">AI Peak Analysis</h1>
+    <main className="p-4" style={{
+      minHeight: '100vh',
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'center',
+      background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)'
+    }}>
+      <div style={{
+        textAlign: 'center',
+        padding: '60px 40px',
+        background: 'rgba(255, 255, 255, 0.95)',
+        borderRadius: '20px',
+        boxShadow: '0 20px 60px rgba(0, 0, 0, 0.3)',
+        maxWidth: '600px',
+        width: '100%'
+      }}>
+        <div style={{
+          fontSize: '72px',
+          marginBottom: '20px',
+          animation: 'pulse 2s ease-in-out infinite'
+        }}>
+          ⏳
+        </div>
 
-      <div className="mb-4 flex gap-2 items-end">
-        <div>
-          <label className="block text-sm">Device (optional)</label>
-          <input value={device} onChange={(e) => setDevice(e.target.value)} className="k-input" placeholder="ksave or device id" />
+        <h1 style={{
+          fontSize: '36px',
+          fontWeight: 700,
+          color: '#374151',
+          marginBottom: '16px',
+          letterSpacing: '-0.5px'
+        }}>
+          Awaiting Analysis
+        </h1>
+
+        <p style={{
+          fontSize: '18px',
+          color: '#6b7280',
+          marginBottom: '24px',
+          lineHeight: '1.6'
+        }}>
+          The AI Peak Analysis feature is currently under development.<br/>
+          Please check back soon for advanced analytics capabilities.
+        </p>
+
+        <div style={{
+          display: 'inline-flex',
+          alignItems: 'center',
+          gap: '12px',
+          padding: '12px 24px',
+          background: '#f3f4f6',
+          borderRadius: '12px',
+          fontSize: '14px',
+          color: '#6b7280'
+        }}>
+          <div style={{
+            width: '8px',
+            height: '8px',
+            borderRadius: '50%',
+            background: '#fbbf24',
+            animation: 'blink 1.5s ease-in-out infinite'
+          }}></div>
+          <span>Status: Pending Development</span>
         </div>
-        <div>
-          <label className="block text-sm">Range</label>
-          <select value={range} onChange={(e) => setRange(e.target.value)} className="k-input">
-            <option value="-15m">Last 15 minutes</option>
-            <option value="-1h">Last 1 hour</option>
-            <option value="-6h">Last 6 hours</option>
-            <option value="-24h">Last 24 hours</option>
-            <option value="-7d">Last 7 days</option>
-          </select>
-        </div>
-        <div>
-          <label className="block text-sm">Realtime</label>
-          <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
-            <input id="realtime" type="checkbox" checked={realtime} onChange={(e) => setRealtime(e.target.checked)} />
-            <label htmlFor="realtime" className="text-sm">Enable</label>
-            <input value={String(intervalMs)} onChange={(e) => setIntervalMs(Number(e.target.value || 1000))} className="k-input narrow" style={{ width: 100 }} />
-            <span className="text-sm">ms</span>
-          </div>
-        </div>
-        <div>
-          <button className="k-btn k-btn-primary" onClick={runAnalysis} disabled={loading}>Generate AI Analysis</button>
-        </div>
+
+        <style>{`
+          @keyframes pulse {
+            0%, 100% { transform: scale(1); opacity: 1; }
+            50% { transform: scale(1.05); opacity: 0.8; }
+          }
+          @keyframes blink {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.3; }
+          }
+        `}</style>
       </div>
-
-      <div style={{ display: 'flex', gap: 12, alignItems: 'center', marginBottom: 8 }}>
-        {loading && <div>Loading data…</div>}
-        {lastUpdate && <div className="text-sm text-muted-foreground">Last update: {new Date(lastUpdate).toLocaleTimeString()}</div>}
-        {realtime && <div className="text-sm text-green-600">Realtime ON</div>}
-      </div>
-      {error && <div className="text-red-600">Error: {error}</div>}
-
-      <section className="mb-4">
-        <h2 className="font-semibold">Summary</h2>
-        <div className="p-3 bg-white border rounded min-h-[48px]">{summary || 'Press Generate AI Analysis to detect peaks.'}</div>
-      </section>
-
-      <section className="mb-4">
-        <h2 className="font-semibold">Detected Peaks</h2>
-        <table className="w-full table-auto border-collapse">
-          <thead>
-            <tr>
-              <th className="border px-2 py-1 text-left">Time</th>
-              <th className="border px-2 py-1 text-right">Value</th>
-              <th className="border px-2 py-1 text-right">Score</th>
-            </tr>
-          </thead>
-          <tbody>
-            {peaks.length === 0 ? (
-              <tr><td colSpan={3} className="p-3 text-center">No peaks detected</td></tr>
-            ) : peaks.map((p, i) => (
-              <tr key={i}>
-                <td className="border px-2 py-1">{new Date(p.time).toLocaleString()}</td>
-                <td className="border px-2 py-1 text-right">{p.value.toFixed(3)}</td>
-                <td className="border px-2 py-1 text-right">{p.score.toFixed(2)}</td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </section>
-
-      <section>
-        <h2 className="font-semibold">Raw series preview</h2>
-        <div className="overflow-auto max-h-64 border rounded p-2">
-          <table className="w-full table-auto">
-            <thead>
-              <tr>
-                <th className="border px-2 py-1">Time</th>
-                <th className="border px-2 py-1 text-right">Value</th>
-              </tr>
-            </thead>
-            <tbody>
-              {series.slice(0, 200).map((s, i) => (
-                <tr key={i}>
-                  <td className="border px-2 py-1">{new Date(s.t).toLocaleString()}</td>
-                  <td className="border px-2 py-1 text-right">{s.v.toFixed(3)}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      </section>
     </main>
   )
 }

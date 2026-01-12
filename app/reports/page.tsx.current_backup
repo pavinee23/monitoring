@@ -136,8 +136,8 @@ export default function AdminPage(): React.ReactElement {
           font-size: 10px !important;
           font-weight: bold;
           text-align: center !important;
-          border: 0.2px solid #333 !important;
-          background: white !important;
+          border: 1px solid #000 !important;
+          background: transparent !important;
           line-height: 1.2;
           white-space: nowrap;
           min-width: 35px;
@@ -145,11 +145,12 @@ export default function AdminPage(): React.ReactElement {
         .k-table td {
           padding: 2px 4px !important;
           font-size: 9px !important;
-          border: 0.1px solid #333 !important;
+          border: 1px solid #000 !important;
           text-align: center !important;
           line-height: 1.2;
           white-space: nowrap;
           overflow: visible;
+          background: transparent !important;
         }
         .k-table td:nth-child(1),
         .k-table td:nth-child(2),
@@ -168,10 +169,10 @@ export default function AdminPage(): React.ReactElement {
           page-break-inside: avoid;
         }
         .k-table tbody tr:nth-child(even) {
-          background: white !important;
+          background: transparent !important;
         }
         .k-table tbody tr:last-child {
-          background: white !important;
+          background: transparent !important;
           font-weight: bold !important;
           border-top: 2px solid #000 !important;
         }
@@ -181,7 +182,7 @@ export default function AdminPage(): React.ReactElement {
           padding: 2px 4px !important;
         }
         .k-table td:last-child {
-          background: white !important;
+          background: transparent !important;
           color: #000 !important;
           font-weight: bold !important;
           white-space: nowrap;
@@ -394,34 +395,34 @@ export default function AdminPage(): React.ReactElement {
       totals.count += 1
 
       trs.push(
-        <tr key={i} style={{ borderTop: '1px solid #f1f5f9' }}>
-          <td style={{ border: '1px solid #e5e7eb', padding: 8, textAlign: 'left' }}>{r.time ? new Date(r.time).toLocaleString() : '-'}</td>
-          <td style={{ border: '1px solid #e5e7eb', padding: 8, textAlign: 'left' }}>{r.device || r.ksave || '-'}</td>
-          <td style={{ border: '1px solid #e5e7eb', padding: 8, textAlign: 'left' }}>{r.location || '-'}</td>
+        <tr key={i} style={{ background: 'transparent' }}>
+          <td style={{ border: '1px solid #ddd', padding: 8, textAlign: 'left', background: 'transparent' }}>{r.time ? new Date(r.time).toLocaleString() : '-'}</td>
+          <td style={{ border: '1px solid #ddd', padding: 8, textAlign: 'left', background: 'transparent' }}>{r.device || r.ksave || '-'}</td>
+          <td style={{ border: '1px solid #ddd', padding: 8, textAlign: 'left', background: 'transparent' }}>{r.location || '-'}</td>
 
-          <td style={{ border: '1px solid #e5e7eb', padding: 8, textAlign: 'center' }}>{Number.isFinite(b_L1) && b_L1 > 0 ? b_L1.toFixed(2) : '-'}</td>
-          <td style={{ border: '1px solid #e5e7eb', padding: 8, textAlign: 'center' }}>{Number.isFinite(b_L2) && b_L2 > 0 ? b_L2.toFixed(2) : '-'}</td>
-          <td style={{ border: '1px solid #e5e7eb', padding: 8, textAlign: 'center' }}>{Number.isFinite(b_L3) && b_L3 > 0 ? b_L3.toFixed(2) : '-'}</td>
-          <td style={{ border: '1px solid #e5e7eb', padding: 8, textAlign: 'center' }}>{Number.isFinite(b_kWh) ? b_kWh.toFixed(3) : '-'}</td>
-          <td style={{ border: '1px solid #e5e7eb', padding: 8, textAlign: 'center' }}>{Number.isFinite(b_P) ? b_P.toFixed(3) : '-'}</td>
-          <td style={{ border: '1px solid #e5e7eb', padding: 8, textAlign: 'center' }}>{Number.isFinite(b_Q) ? b_Q.toFixed(3) : '-'}</td>
-          <td style={{ border: '1px solid #e5e7eb', padding: 8, textAlign: 'center' }}>{Number.isFinite(b_S) ? b_S.toFixed(3) : '-'}</td>
-          <td style={{ border: '1px solid #e5e7eb', padding: 8, textAlign: 'center' }}>{Number.isFinite(b_PF) ? b_PF.toFixed(3) : '-'}</td>
-          <td style={{ border: '1px solid #e5e7eb', padding: 8, textAlign: 'center' }}>{Number.isFinite(b_THD) ? b_THD.toFixed(3) : '-'}</td>
-          <td style={{ border: '1px solid #e5e7eb', padding: 8, textAlign: 'center' }}>{Number.isFinite(b_F) ? b_F.toFixed(3) : '-'}</td>
+          <td style={{ border: '1px solid #ddd', padding: 8, textAlign: 'center', background: 'transparent' }}>{Number.isFinite(b_L1) && b_L1 > 0 ? b_L1.toFixed(2) : '-'}</td>
+          <td style={{ border: '1px solid #ddd', padding: 8, textAlign: 'center', background: 'transparent' }}>{Number.isFinite(b_L2) && b_L2 > 0 ? b_L2.toFixed(2) : '-'}</td>
+          <td style={{ border: '1px solid #ddd', padding: 8, textAlign: 'center', background: 'transparent' }}>{Number.isFinite(b_L3) && b_L3 > 0 ? b_L3.toFixed(2) : '-'}</td>
+          <td style={{ border: '1px solid #ddd', padding: 8, textAlign: 'center', background: 'transparent' }}>{Number.isFinite(b_kWh) ? b_kWh.toFixed(3) : '-'}</td>
+          <td style={{ border: '1px solid #ddd', padding: 8, textAlign: 'center', background: 'transparent' }}>{Number.isFinite(b_P) ? b_P.toFixed(3) : '-'}</td>
+          <td style={{ border: '1px solid #ddd', padding: 8, textAlign: 'center', background: 'transparent' }}>{Number.isFinite(b_Q) ? b_Q.toFixed(3) : '-'}</td>
+          <td style={{ border: '1px solid #ddd', padding: 8, textAlign: 'center', background: 'transparent' }}>{Number.isFinite(b_S) ? b_S.toFixed(3) : '-'}</td>
+          <td style={{ border: '1px solid #ddd', padding: 8, textAlign: 'center', background: 'transparent' }}>{Number.isFinite(b_PF) ? b_PF.toFixed(3) : '-'}</td>
+          <td style={{ border: '1px solid #ddd', padding: 8, textAlign: 'center', background: 'transparent' }}>{Number.isFinite(b_THD) ? b_THD.toFixed(3) : '-'}</td>
+          <td style={{ border: '1px solid #ddd', padding: 8, textAlign: 'center', background: 'transparent' }}>{Number.isFinite(b_F) ? b_F.toFixed(3) : '-'}</td>
 
-          <td style={{ border: '1px solid #e5e7eb', padding: 8, textAlign: 'center' }}>{Number.isFinite(m_L1) && m_L1 > 0 ? m_L1.toFixed(2) : '-'}</td>
-          <td style={{ border: '1px solid #e5e7eb', padding: 8, textAlign: 'center' }}>{Number.isFinite(m_L2) && m_L2 > 0 ? m_L2.toFixed(2) : '-'}</td>
-          <td style={{ border: '1px solid #e5e7eb', padding: 8, textAlign: 'center' }}>{Number.isFinite(m_L3) && m_L3 > 0 ? m_L3.toFixed(2) : '-'}</td>
-          <td style={{ border: '1px solid #e5e7eb', padding: 8, textAlign: 'center' }}>{Number.isFinite(m_kWh) ? m_kWh.toFixed(3) : '-'}</td>
-          <td style={{ border: '1px solid #e5e7eb', padding: 8, textAlign: 'center' }}>{Number.isFinite(m_P) ? m_P.toFixed(3) : '-'}</td>
-          <td style={{ border: '1px solid #e5e7eb', padding: 8, textAlign: 'center' }}>{Number.isFinite(m_Q) ? m_Q.toFixed(3) : '-'}</td>
-          <td style={{ border: '1px solid #e5e7eb', padding: 8, textAlign: 'center' }}>{Number.isFinite(m_S) ? m_S.toFixed(3) : '-'}</td>
-          <td style={{ border: '1px solid #e5e7eb', padding: 8, textAlign: 'center' }}>{Number.isFinite(m_PF) ? m_PF.toFixed(3) : '-'}</td>
-          <td style={{ border: '1px solid #e5e7eb', padding: 8, textAlign: 'center' }}>{Number.isFinite(m_THD) ? m_THD.toFixed(3) : '-'}</td>
-          <td style={{ border: '1px solid #e5e7eb', padding: 8, textAlign: 'center' }}>{Number.isFinite(m_F) ? m_F.toFixed(3) : '-'}</td>
+          <td style={{ border: '1px solid #ddd', padding: 8, textAlign: 'center', background: 'transparent' }}>{Number.isFinite(m_L1) && m_L1 > 0 ? m_L1.toFixed(2) : '-'}</td>
+          <td style={{ border: '1px solid #ddd', padding: 8, textAlign: 'center', background: 'transparent' }}>{Number.isFinite(m_L2) && m_L2 > 0 ? m_L2.toFixed(2) : '-'}</td>
+          <td style={{ border: '1px solid #ddd', padding: 8, textAlign: 'center', background: 'transparent' }}>{Number.isFinite(m_L3) && m_L3 > 0 ? m_L3.toFixed(2) : '-'}</td>
+          <td style={{ border: '1px solid #ddd', padding: 8, textAlign: 'center', background: 'transparent' }}>{Number.isFinite(m_kWh) ? m_kWh.toFixed(3) : '-'}</td>
+          <td style={{ border: '1px solid #ddd', padding: 8, textAlign: 'center', background: 'transparent' }}>{Number.isFinite(m_P) ? m_P.toFixed(3) : '-'}</td>
+          <td style={{ border: '1px solid #ddd', padding: 8, textAlign: 'center', background: 'transparent' }}>{Number.isFinite(m_Q) ? m_Q.toFixed(3) : '-'}</td>
+          <td style={{ border: '1px solid #ddd', padding: 8, textAlign: 'center', background: 'transparent' }}>{Number.isFinite(m_S) ? m_S.toFixed(3) : '-'}</td>
+          <td style={{ border: '1px solid #ddd', padding: 8, textAlign: 'center', background: 'transparent' }}>{Number.isFinite(m_PF) ? m_PF.toFixed(3) : '-'}</td>
+          <td style={{ border: '1px solid #ddd', padding: 8, textAlign: 'center', background: 'transparent' }}>{Number.isFinite(m_THD) ? m_THD.toFixed(3) : '-'}</td>
+          <td style={{ border: '1px solid #ddd', padding: 8, textAlign: 'center', background: 'transparent' }}>{Number.isFinite(m_F) ? m_F.toFixed(3) : '-'}</td>
 
-          <td style={{ border: '1px solid #e5e7eb', padding: 8, textAlign: 'center', fontWeight: 'bold' }}>
+          <td style={{ border: '1px solid #ddd', padding: 8, textAlign: 'center', fontWeight: 'bold', background: 'transparent' }}>
             {Number.isFinite(energyReduction) && energyReduction > 0 ?
               `${(energyReduction * 0.5135).toFixed(4)} kgCO₂` : '-'}
           </td>
@@ -433,64 +434,64 @@ export default function AdminPage(): React.ReactElement {
     const cnt = totals.count || 1
     const avg = (v: number) => (cnt ? (v / cnt) : 0)
     trs.push(
-      <tr key="totals" style={{ borderTop: '2px solid #000', fontWeight: 700, fontSize: '14px' }}>
-        <td style={{ border: '1px solid #e5e7eb', padding: 10, textAlign: 'center' }}>
+      <tr key="totals" style={{ borderTop: '2px solid #000', fontWeight: 700, fontSize: '14px', background: 'transparent' }}>
+        <td style={{ border: '1px solid #ddd', padding: 10, textAlign: 'center', background: 'transparent' }}>
           <strong>TOTAL ({cnt})</strong>
         </td>
-        <td style={{ border: '1px solid #e5e7eb', padding: 10 }}></td>
-        <td style={{ border: '1px solid #e5e7eb', padding: 10 }}></td>
+        <td style={{ border: '1px solid #ddd', padding: 10, background: 'transparent' }}></td>
+        <td style={{ border: '1px solid #ddd', padding: 10, background: 'transparent' }}></td>
 
-        <td style={{ border: '1px solid #e5e7eb', padding: 10, textAlign: 'center' }}></td>
-        <td style={{ border: '1px solid #e5e7eb', padding: 10, textAlign: 'center' }}></td>
-        <td style={{ border: '1px solid #e5e7eb', padding: 10, textAlign: 'center' }}></td>
-        <td style={{ border: '1px solid #e5e7eb', padding: 10, textAlign: 'center' }}>
+        <td style={{ border: '1px solid #ddd', padding: 10, textAlign: 'center', background: 'transparent' }}></td>
+        <td style={{ border: '1px solid #ddd', padding: 10, textAlign: 'center', background: 'transparent' }}></td>
+        <td style={{ border: '1px solid #ddd', padding: 10, textAlign: 'center', background: 'transparent' }}></td>
+        <td style={{ border: '1px solid #ddd', padding: 10, textAlign: 'center', background: 'transparent' }}>
           <strong>{totals.b_kWh.toFixed(3)}</strong>
         </td>
-        <td style={{ border: '1px solid #e5e7eb', padding: 10, textAlign: 'center' }}>
+        <td style={{ border: '1px solid #ddd', padding: 10, textAlign: 'center', background: 'transparent' }}>
           <strong>{totals.b_P.toFixed(3)}</strong>
         </td>
-        <td style={{ border: '1px solid #e5e7eb', padding: 10, textAlign: 'center' }}>
+        <td style={{ border: '1px solid #ddd', padding: 10, textAlign: 'center', background: 'transparent' }}>
           <strong>{totals.b_Q.toFixed(3)}</strong>
         </td>
-        <td style={{ border: '1px solid #e5e7eb', padding: 10, textAlign: 'center' }}>
+        <td style={{ border: '1px solid #ddd', padding: 10, textAlign: 'center', background: 'transparent' }}>
           <strong>{totals.b_S.toFixed(3)}</strong>
         </td>
-        <td style={{ border: '1px solid #e5e7eb', padding: 10, textAlign: 'center' }}>
+        <td style={{ border: '1px solid #ddd', padding: 10, textAlign: 'center', background: 'transparent' }}>
           <strong>{avg(totals.b_PF).toFixed(3)}</strong>
         </td>
-        <td style={{ border: '1px solid #e5e7eb', padding: 10, textAlign: 'center' }}>
+        <td style={{ border: '1px solid #ddd', padding: 10, textAlign: 'center', background: 'transparent' }}>
           <strong>{avg(totals.b_THD).toFixed(3)}</strong>
         </td>
-        <td style={{ border: '1px solid #e5e7eb', padding: 10, textAlign: 'center' }}>
+        <td style={{ border: '1px solid #ddd', padding: 10, textAlign: 'center', background: 'transparent' }}>
           <strong>{avg(totals.b_F).toFixed(3)}</strong>
         </td>
 
-        <td style={{ border: '1px solid #e5e7eb', padding: 10, textAlign: 'center' }}></td>
-        <td style={{ border: '1px solid #e5e7eb', padding: 10, textAlign: 'center' }}></td>
-        <td style={{ border: '1px solid #e5e7eb', padding: 10, textAlign: 'center' }}></td>
-        <td style={{ border: '1px solid #e5e7eb', padding: 10, textAlign: 'center' }}>
+        <td style={{ border: '1px solid #ddd', padding: 10, textAlign: 'center', background: 'transparent' }}></td>
+        <td style={{ border: '1px solid #ddd', padding: 10, textAlign: 'center', background: 'transparent' }}></td>
+        <td style={{ border: '1px solid #ddd', padding: 10, textAlign: 'center', background: 'transparent' }}></td>
+        <td style={{ border: '1px solid #ddd', padding: 10, textAlign: 'center', background: 'transparent' }}>
           <strong>{totals.m_kWh.toFixed(3)}</strong>
         </td>
-        <td style={{ border: '1px solid #e5e7eb', padding: 10, textAlign: 'center' }}>
+        <td style={{ border: '1px solid #ddd', padding: 10, textAlign: 'center', background: 'transparent' }}>
           <strong>{totals.m_P.toFixed(3)}</strong>
         </td>
-        <td style={{ border: '1px solid #e5e7eb', padding: 10, textAlign: 'center' }}>
+        <td style={{ border: '1px solid #ddd', padding: 10, textAlign: 'center', background: 'transparent' }}>
           <strong>{totals.m_Q.toFixed(3)}</strong>
         </td>
-        <td style={{ border: '1px solid #e5e7eb', padding: 10, textAlign: 'center' }}>
+        <td style={{ border: '1px solid #ddd', padding: 10, textAlign: 'center', background: 'transparent' }}>
           <strong>{totals.m_S.toFixed(3)}</strong>
         </td>
-        <td style={{ border: '1px solid #e5e7eb', padding: 10, textAlign: 'center' }}>
+        <td style={{ border: '1px solid #ddd', padding: 10, textAlign: 'center', background: 'transparent' }}>
           <strong>{avg(totals.m_PF).toFixed(3)}</strong>
         </td>
-        <td style={{ border: '1px solid #e5e7eb', padding: 10, textAlign: 'center' }}>
+        <td style={{ border: '1px solid #ddd', padding: 10, textAlign: 'center', background: 'transparent' }}>
           <strong>{avg(totals.m_THD).toFixed(3)}</strong>
         </td>
-        <td style={{ border: '1px solid #e5e7eb', padding: 10, textAlign: 'center' }}>
+        <td style={{ border: '1px solid #ddd', padding: 10, textAlign: 'center', background: 'transparent' }}>
           <strong>{avg(totals.m_F).toFixed(3)}</strong>
-        </td>
+        </td>FromInflux
 
-        <td style={{ border: '1px solid #e5e7eb', padding: 10, textAlign: 'center' }}>
+        <td style={{ border: '1px solid #ddd', padding: 10, textAlign: 'center', background: 'transparent' }}>
           <strong>{(totals.totalER * 0.5135).toFixed(4)} kgCO₂</strong>
         </td>
       </tr>
@@ -500,7 +501,7 @@ export default function AdminPage(): React.ReactElement {
   }, [filtered, loading, error, currents.length])
 
   return (
-    <div className="page-shell" style={{ position: 'relative' }}>
+    <div className="page-shell" style={{ position: 'relative', background: '#f9fafb', minHeight: '100vh', padding: '20px' }}>
       {/* Company logo - only visible when printing */}
       <img
         src="/k-energy-save-logo.jpg"
@@ -521,73 +522,202 @@ export default function AdminPage(): React.ReactElement {
       />
       {/* Page number footer - only visible when printing */}
       <div className="print-page-number" style={{ display: 'none' }}></div>
-      <header style={{ textAlign: 'center', position: 'relative', zIndex: 1 }}>
-        <h1 style={{ fontSize: '32px' }}>Reports Carbon Credit</h1>
-        <div style={{ position: 'absolute', top: 0, right: 0, display: 'flex', gap: 8, alignItems: 'center' }} className="print:hidden">
+      <header style={{ 
+        textAlign: 'center', 
+        position: 'relative', 
+        zIndex: 1,
+        background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+        padding: '30px 20px',
+        borderRadius: '16px',
+        marginBottom: '24px',
+        boxShadow: '0 10px 40px rgba(102, 126, 234, 0.3)'
+      }}>
+        <h1 style={{ 
+          fontSize: '42px', 
+          color: 'white',
+          margin: '0 0 8px 0',
+          fontWeight: 'bold',
+          textShadow: '2px 2px 4px rgba(0,0,0,0.2)',
+          letterSpacing: '1px'
+        }}>📊 Carbon Credit Reports</h1>
+        <p style={{ 
+          color: 'rgba(255,255,255,0.9)', 
+          fontSize: '16px', 
+          margin: 0,
+          fontWeight: 500
+        }}>Energy Monitoring & Carbon Emission Analysis</p>
+        <div style={{ position: 'absolute', top: 20, right: 20, display: 'flex', gap: 8, alignItems: 'center' }} className="print:hidden">
           <button 
             className="k-btn k-btn-secondary crisp-text" 
             onClick={() => window.print()}
-            style={{ background: '#10b981', color: 'white' }}
+            style={{ 
+              background: 'white', 
+              color: '#667eea',
+              fontWeight: 600,
+              padding: '10px 20px',
+              borderRadius: '8px',
+              border: 'none',
+              boxShadow: '0 4px 12px rgba(0,0,0,0.15)',
+              cursor: 'pointer',
+              transition: 'all 0.3s'
+            }}
           >
             🖨️ Print Report
           </button>
-          <Link href="/sites" className="k-btn k-btn-ghost crisp-text">Back to Sites</Link>
+          <Link href="/sites" className="k-btn k-btn-ghost crisp-text" style={{ 
+            background: 'rgba(255,255,255,0.2)', 
+            color: 'white',
+            padding: '10px 20px',
+            borderRadius: '8px',
+            textDecoration: 'none'
+          }}>← Back to Sites</Link>
 
-          <button className="k-btn k-btn-primary crisp-text" onClick={handleLogout}>
+          <button className="k-btn k-btn-primary crisp-text" onClick={handleLogout} style={{
+            background: 'rgba(255,255,255,0.2)',
+            color: 'white',
+            padding: '10px 20px',
+            borderRadius: '8px',
+            border: 'none'
+          }}>
             {token ? 'Logout' : 'Exit'}
           </button>
         </div>
       </header>
 
-                  <section style={{ marginTop: 18 }}>
-        <h3>Company Name: K Energy Save co.,Ltd </h3>
-        <h3>Address: 1114,27 Dunchon-daero 457beon-gil, Jungwon-gu, Seongnam-si, Gyeonggi-do, Republic of korea</h3>
-         <h3>Date: {new Date().toLocaleString()}</h3> 
+      <section style={{ 
+        marginTop: 0, 
+        background: 'white',
+        padding: '20px 30px',
+        borderRadius: '12px',
+        boxShadow: '0 4px 20px rgba(0,0,0,0.08)',
+        marginBottom: '20px'
+      }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 12 }}>
+          <div style={{ 
+            width: 4, 
+            height: 60, 
+            background: 'linear-gradient(180deg, #667eea 0%, #764ba2 100%)',
+            borderRadius: 2
+          }}></div>
+          <div>
+            <h3 style={{ margin: 0, fontSize: 18, color: '#1f2937', fontWeight: 700 }}>🏢 Company Information</h3>
+            <p style={{ margin: 0, fontSize: 14, color: '#6b7280' }}>K Energy Save Co., Ltd</p>
+          </div>
+        </div>
+        <div style={{ paddingLeft: 16, borderLeft: '2px solid #e5e7eb' }}>
+          <p style={{ margin: '8px 0', fontSize: 14, color: '#374151' }}>
+            <strong style={{ color: '#667eea' }}>📍 Address:</strong> 1114, 27 Dunchon-daero 457beon-gil, Jungwon-gu, Seongnam-si, Gyeonggi-do, Republic of Korea
+          </p>
+          <p style={{ margin: '8px 0', fontSize: 14, color: '#374151' }}>
+            <strong style={{ color: '#667eea' }}>📅 Report Date:</strong> {new Date().toLocaleString('en-US', { 
+              weekday: 'long', 
+              year: 'numeric', 
+              month: 'long', 
+              day: 'numeric',
+              hour: '2-digit',
+              minute: '2-digit'
+            })}
+          </p>
+        </div>
       </section>
 
-      <section style={{ marginTop: 18, position: 'relative', zIndex: 1 }}>
-        <div style={{ marginTop: 18 }} className="data-card">
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-            <h3 style={{ margin: 0 }}>
-              Data Collection Period
-              <br />
-              <span style={{ fontSize: '12px', color: '#374151', fontWeight: 'normal' }}>
-                Period: {startAt && endAt ? 
-                  `${new Date(startAt).toLocaleString()} - ${new Date(endAt).toLocaleString()}` : 
-                  `Last ${selectedRange.replace('-', '').replace('h', ' hour').replace('d', ' day').replace('m', ' minute')}`
-                }
-              </span>
-            </h3>
-            <div className="controls-right" style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
-             
+      <section style={{ marginTop: 0, position: 'relative', zIndex: 1 }}>
+        <div style={{ marginTop: 0 }} className="data-card">
+          <div style={{ 
+            background: 'white',
+            borderRadius: '12px',
+            padding: '24px',
+            boxShadow: '0 4px 20px rgba(0,0,0,0.08)',
+            marginBottom: '20px'
+          }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 }}>
+              <div>
+                <h3 style={{ margin: 0, fontSize: 20, color: '#1f2937', fontWeight: 700, display: 'flex', alignItems: 'center', gap: 8 }}>
+                  <span style={{ 
+                    background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+                    width: 32,
+                    height: 32,
+                    borderRadius: 8,
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    color: 'white',
+                    fontSize: 16
+                  }}>📊</span>
+                  Data Collection Period
+                </h3>
+                <p style={{ 
+                  fontSize: '14px', 
+                  color: '#6b7280', 
+                  fontWeight: 'normal',
+                  margin: '8px 0 0 40px',
+                  padding: '8px 12px',
+                  background: '#f3f4f6',
+                  borderRadius: 6,
+                  display: 'inline-block'
+                }}>
+                  📅 {startAt && endAt ? 
+                    `${new Date(startAt).toLocaleString()} - ${new Date(endAt).toLocaleString()}` : 
+                    `Last ${selectedRange.replace('-', '').replace('h', ' hour').replace('d', ' day').replace('m', ' minute')}`
+                  }
+                </p>
+              </div>
+              <div className="controls-right" style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+               
+              </div>
             </div>
-          </div>
 
           <div style={{ height: 8 }} />
 
           {/* Date/time controls placed inside a small inset card for spacing & clarity */}
-          <div className="controls-card print:hidden">
+          <div className="controls-card print:hidden" style={{
+            background: '#f9fafb',
+            padding: '16px',
+            borderRadius: '8px',
+            border: '1px solid #e5e7eb',
+            marginBottom: 16
+          }}>
             <div style={{ display: 'flex', gap: 12, alignItems: 'center', flexWrap: 'wrap' }}>
               <div style={{ display: 'flex', flexDirection: 'column', minWidth: 220, flex: '0 0 240px' }}>
-                <label style={{ fontSize: 12, color: '#374151' }}>From</label>
-                <input type="datetime-local" className="k-input" value={startAt} onChange={(e) => setStartAt(e.target.value)} />
+                <label style={{ fontSize: 12, color: '#374151', fontWeight: 600, marginBottom: 4 }}>📅 From</label>
+                <input type="datetime-local" className="k-input" value={startAt} onChange={(e) => setStartAt(e.target.value)} style={{
+                  borderRadius: 6,
+                  border: '1px solid #d1d5db',
+                  padding: '8px 12px'
+                }} />
               </div>
               <div style={{ display: 'flex', flexDirection: 'column', minWidth: 220, flex: '0 0 240px' }}>
-                <label style={{ fontSize: 12, color: '#374151' }}>To</label>
-                <input type="datetime-local" className="k-input" value={endAt} onChange={(e) => setEndAt(e.target.value)} />
+                <label style={{ fontSize: 12, color: '#374151', fontWeight: 600, marginBottom: 4 }}>📅 To</label>
+                <input type="datetime-local" className="k-input" value={endAt} onChange={(e) => setEndAt(e.target.value)} style={{
+                  borderRadius: 6,
+                  border: '1px solid #d1d5db',
+                  padding: '8px 12px'
+                }} />
               </div>
               {/* Search button removed per user request; users can use the lower search input or refresh via range controls */}
             </div>
           </div>
 
-          <div className="search-controls print:hidden" style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
-            <select className="k-input narrow" value={selectedDevice} onChange={(e) => setSelectedDevice(e.target.value)}>
+          <div className="search-controls print:hidden" style={{ display: 'flex', gap: 8, alignItems: 'center', marginBottom: 16 }}>
+            <select className="k-input narrow" value={selectedDevice} onChange={(e) => setSelectedDevice(e.target.value)} style={{
+              borderRadius: 6,
+              border: '1px solid #d1d5db',
+              padding: '8px 12px',
+              fontSize: 14,
+              background: 'white'
+            }}>
               <option value="all">All devices</option>
               {devices.map((d) => (
                 <option key={d} value={d}>{d}</option>
               ))}
             </select>
-            <input className="k-input narrow" placeholder="Search (series name / no / device / ksave / location)" value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} />
+            <input className="k-input narrow" placeholder="🔍 Search (device / location / series)" value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} style={{
+              flex: 1,
+              borderRadius: 6,
+              border: '1px solid #d1d5db',
+              padding: '8px 12px',
+              fontSize: 14
+            }} />
             <button className="k-btn k-btn-ghost crisp-text" onClick={async (e) => {
               // visual click feedback: add 'clicked' class briefly
               try { (e.currentTarget as HTMLElement).classList.add('clicked') } catch (_) {}
@@ -613,43 +743,37 @@ export default function AdminPage(): React.ReactElement {
               } catch (err: any) {
                 setError(String(err?.message || err))
               } finally { setLoading(false) }
-            }}>Search</button>
+            }} style={{
+              background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+              color: 'white',
+              padding: '8px 20px',
+              borderRadius: 6,
+              border: 'none',
+              fontWeight: 600,
+              cursor: 'pointer',
+              boxShadow: '0 2px 8px rgba(102, 126, 234, 0.3)',
+              transition: 'all 0.3s'
+            }}>🔍 Search</button>
           </div>
 
-          <div style={{ marginTop: 12 }} className="k-table-wrapper">
-            <table className="k-table">
-            <thead style={{ background: '#f8fafc' }}>
-              <tr>
-                <th rowSpan={2} style={{ padding: 8, textAlign: 'center', border: '1px solid #e5e7eb' }}>Time</th>
-                <th rowSpan={2} style={{ padding: 8, textAlign: 'center', border: '1px solid #e5e7eb' }}>Device</th>
-                <th rowSpan={2} style={{ padding: 8, textAlign: 'center', border: '1px solid #e5e7eb' }}>Site</th>
-                <th colSpan={10} className="power-group-header" style={{ padding: 8, textAlign: 'center', border: '1px solid #e5e7eb' }}>Power (before)</th>
-                <th colSpan={10} className="power-group-header" style={{ padding: 8, textAlign: 'center', border: '1px solid #e5e7eb' }}>Power (metrics)</th>
-                <th rowSpan={2} style={{ padding: 8, textAlign: 'center', border: '1px solid #e5e7eb' }}>ER</th>
+          <div style={{ marginTop: 12 }} className="k-table-wrapper">\n            <table className="k-table" style={{ \n              background: 'white',\n              borderRadius: 8,\n              overflow: 'hidden',\n              boxShadow: '0 2px 12px rgba(0,0,0,0.08)'\n            }}>
+            <thead style={{ background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)' }}>\n              <tr>\n                <th rowSpan={2} style={{ padding: 12, textAlign: 'center', border: '1px solid rgba(255,255,255,0.2)', background: 'transparent', color: 'white', fontWeight: 600 }}>⏰ Time</th>\n                <th rowSpan={2} style={{ padding: 12, textAlign: 'center', border: '1px solid rgba(255,255,255,0.2)', background: 'transparent', color: 'white', fontWeight: 600 }}>🖥️ Device</th>\n                <th rowSpan={2} style={{ padding: 12, textAlign: 'center', border: '1px solid rgba(255,255,255,0.2)', background: 'transparent', color: 'white', fontWeight: 600 }}>📍 Site</th>\n                <th colSpan={10} className="power-group-header" style={{ padding: 12, textAlign: 'center', border: '1px solid rgba(255,255,255,0.2)', background: 'rgba(255,255,255,0.1)', color: 'white', fontWeight: 700 }}>⚡ Power (before)</th>\n                <th colSpan={10} className="power-group-header" style={{ padding: 12, textAlign: 'center', border: '1px solid rgba(255,255,255,0.2)', background: 'rgba(255,255,255,0.1)', color: 'white', fontWeight: 700 }}>⚡ Power (metrics)</th>\n                <th rowSpan={2} style={{ padding: 12, textAlign: 'center', border: '1px solid rgba(255,255,255,0.2)', background: 'transparent', color: 'white', fontWeight: 600 }}>🌱 ER</th>
               </tr>
               <tr>
-                <th style={{ padding: 8, textAlign: 'center', border: '1px solid #e5e7eb' }}>L1</th>
-                <th style={{ padding: 8, textAlign: 'center', border: '1px solid #e5e7eb' }}>L2</th>
-                <th style={{ padding: 8, textAlign: 'center', border: '1px solid #e5e7eb' }}>L3</th>
+                <th style={{ padding: 8, textAlign: 'center', border: '1px solid rgba(255,255,255,0.2)', background: 'rgba(255,255,255,0.05)', color: 'white', fontSize: 12 }}>L1</th>\n                <th style={{ padding: 8, textAlign: 'center', border: '1px solid rgba(255,255,255,0.2)', background: 'rgba(255,255,255,0.05)', color: 'white', fontSize: 12 }}>L2</th>\n                <th style={{ padding: 8, textAlign: 'center', border: '1px solid rgba(255,255,255,0.2)', background: 'rgba(255,255,255,0.05)', color: 'white', fontSize: 12 }}>L3</th>
                 {['kWh','P','Q','S','PF','THD','F'].map((c) => (
-                  <th key={`before-${c}`} style={{ padding: 8, textAlign: 'center', border: '1px solid #e5e7eb' }}>{c}</th>
+                  <th key={`before-${c}`} style={{ padding: 8, textAlign: 'center', border: '1px solid rgba(255,255,255,0.2)', background: 'rgba(255,255,255,0.05)', color: 'white', fontSize: 12 }}>{c}</th>
                 ))}
-                <th style={{ padding: 8, textAlign: 'center', border: '1px solid #e5e7eb' }}>L1</th>
-                <th style={{ padding: 8, textAlign: 'center', border: '1px solid #e5e7eb' }}>L2</th>
-                <th style={{ padding: 8, textAlign: 'center', border: '1px solid #e5e7eb' }}>L3</th>
+                <th style={{ padding: 8, textAlign: 'center', border: '1px solid rgba(255,255,255,0.2)', background: 'rgba(255,255,255,0.05)', color: 'white', fontSize: 12 }}>L1</th>\n                <th style={{ padding: 8, textAlign: 'center', border: '1px solid rgba(255,255,255,0.2)', background: 'rgba(255,255,255,0.05)', color: 'white', fontSize: 12 }}>L2</th>\n                <th style={{ padding: 8, textAlign: 'center', border: '1px solid rgba(255,255,255,0.2)', background: 'rgba(255,255,255,0.05)', color: 'white', fontSize: 12 }}>L3</th>
                 {['kWh','P','Q','S','PF','THD','F'].map((c) => (
-                  <th key={`metrics-${c}`} style={{ padding: 8, textAlign: 'center', border: '1px solid #e5e7eb' }}>{c}</th>
+                  <th key={`metrics-${c}`} style={{ padding: 8, textAlign: 'center', border: '1px solid rgba(255,255,255,0.2)', background: 'rgba(255,255,255,0.05)', color: 'white', fontSize: 12 }}>{c}</th>
                 ))}
               </tr>
             </thead>
             <tbody>{rows}</tbody>
           </table>
         </div>
-        </div>
-      </section>
-    </div>
-  )
-}
+          </div>\n        </div>\n      </section>\n    </div>\n  )\n}
 
 
 

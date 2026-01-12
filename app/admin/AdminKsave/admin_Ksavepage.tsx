@@ -3,6 +3,7 @@
 import React, { useEffect, useMemo, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
+import InfluxToPostgresSync from '@/app/components/InfluxToPostgresSync'
 
 type AnyObj = Record<string, any>
 
@@ -14,11 +15,24 @@ export default function AdminPage(): React.ReactElement {
   const [currents, setCurrents] = useState<AnyObj[]>([])
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [lastInfluxUpdate, setLastInfluxUpdate] = useState<Date | null>(null)
+
+  // Database states
+  const [devices, setDevices] = useState<AnyObj[]>([])
+  const [deviceMetrics, setDeviceMetrics] = useState<AnyObj[]>([])
+  const [dbLoading, setDbLoading] = useState(false)
+  const [dbError, setDbError] = useState<string | null>(null)
 
   const [searchQuery, setSearchQuery] = useState<string>('')
   const [debouncedQuery, setDebouncedQuery] = useState<string>('')
   const [selectedRange, setSelectedRange] = useState<string>('-1h')
   const [selectedDevice, setSelectedDevice] = useState<string>('all')
+  
+  // Pagination states
+  const [currentPageDB, setCurrentPageDB] = useState<number>(1)
+  const [itemsPerPageDB, setItemsPerPageDB] = useState<number>(10)
+  const [currentPageInflux, setCurrentPageInflux] = useState<number>(1)
+  const [itemsPerPageInflux, setItemsPerPageInflux] = useState<number>(20)
   // custom start/stop datetime (datetime-local format)
   const [startAt, setStartAt] = useState<string>(() => {
     try {
@@ -48,6 +62,81 @@ export default function AdminPage(): React.ReactElement {
     return () => { mounted = false; clearInterval(iv) }
   }, [])
 
+  // Fetch synced InfluxDB data from PostgreSQL database (real-time polling every 3 seconds)
+  useEffect(() => {
+    let mounted = true
+    const fetchDatabaseData = async () => {
+      setDbLoading(true)
+      setDbError(null)
+      try {
+        // Fetch synced InfluxDB data from PostgreSQL influx_power_data table
+        const syncedRes = await fetch('/api/database/sync-influx-data?limit=100')
+        if (syncedRes.ok) {
+          const syncedBody = await syncedRes.json()
+          if (mounted && syncedBody.ok && syncedBody.data) {
+            // Group by device and get latest entry for each
+            const deviceMap = new Map<string, any>()
+            syncedBody.data.forEach((row: any) => {
+              const deviceKey = row.device || row.ksave_id
+              if (!deviceMap.has(deviceKey) || new Date(row.measurement_time) > new Date(deviceMap.get(deviceKey).measurement_time)) {
+                deviceMap.set(deviceKey, row)
+              }
+            })
+
+            // Transform synced data to match the expected device format
+            const transformedDevices = Array.from(deviceMap.values()).map((row: any) => ({
+              deviceid: row.id,
+              devicename: row.device,
+              ksaveid: row.ksave_id,
+              ipaddress: '-',
+              location: row.location,
+              status: 'ON', // Assume ON if data exists
+              latestMetric: {
+                timestamp: row.measurement_time,
+                location: row.location,
+                before_p: row.before_p,
+                before_q: row.before_q,
+                before_s: row.before_s,
+                metrics_p: row.metrics_p,
+                metrics_q: row.metrics_q,
+                metrics_s: row.metrics_s,
+                er: row.er
+              }
+            }))
+            setDevices(transformedDevices)
+          }
+        } else {
+          // Fallback to old API if sync table doesn't exist yet
+          const devicesRes = await fetch('/api/devices')
+          if (devicesRes.ok) {
+            const devicesBody = await devicesRes.json()
+            if (mounted && devicesBody.devices) {
+              setDevices(devicesBody.devices)
+            }
+          }
+
+          const metricsRes = await fetch('/api/device-metrics')
+          if (metricsRes.ok) {
+            const metricsBody = await metricsRes.json()
+            if (mounted && metricsBody.metrics) {
+              setDeviceMetrics(metricsBody.metrics)
+            }
+          }
+        }
+      } catch (e: any) {
+        if (mounted) setDbError(String(e))
+      } finally {
+        if (mounted) setDbLoading(false)
+      }
+    }
+    fetchDatabaseData()
+    const iv = setInterval(fetchDatabaseData, 10000) // Poll every 10 seconds (reduced from 3s to save connections)
+    return () => {
+      mounted = false
+      clearInterval(iv)
+    }
+  }, [])
+
   useEffect(() => {
     // fetcher can be called from UI (Search button) as well as interval/useEffect
     let mounted = true
@@ -67,7 +156,10 @@ export default function AdminPage(): React.ReactElement {
         if (!res.ok) {
           if (mounted) setError(body?.error || 'Failed to load currents')
         } else {
-          if (mounted) setCurrents(body.rows || body || [])
+          if (mounted) {
+            setCurrents(body.rows || body || [])
+            setLastInfluxUpdate(new Date())
+          }
         }
       } catch (e: any) {
         if (mounted) setError(String(e))
@@ -91,7 +183,7 @@ export default function AdminPage(): React.ReactElement {
     return () => clearTimeout(iv)
   }, [searchQuery])
 
-  const devices = useMemo(() => {
+  const devicesFromInflux = useMemo(() => {
     const s = new Set<string>()
     for (const r of currents) {
       const d = (r.device || r.ksave || r.ksave_id || r.device_id || '')?.toString() || ''
@@ -99,6 +191,27 @@ export default function AdminPage(): React.ReactElement {
     }
     return Array.from(s).sort()
   }, [currents])
+
+  // Merge database devices with their latest metrics from PostgreSQL only
+  const mergedDeviceData = useMemo(() => {
+    return devices.map(device => {
+      const metric = deviceMetrics.find(m => m.ksaveid === device.ksaveid || m.devicename === device.devicename)
+
+      return {
+        ...device,
+        latestMetric: metric
+      }
+    })
+  }, [devices, deviceMetrics])
+
+  // Paginated database data
+  const paginatedDBData = useMemo(() => {
+    const startIndex = (currentPageDB - 1) * itemsPerPageDB
+    const endIndex = startIndex + itemsPerPageDB
+    return mergedDeviceData.slice(startIndex, endIndex)
+  }, [mergedDeviceData, currentPageDB, itemsPerPageDB])
+
+  const totalPagesDB = Math.ceil(mergedDeviceData.length / itemsPerPageDB)
 
   const filtered = useMemo(() => {
     const q = (debouncedQuery || '').trim().toLowerCase()
@@ -128,23 +241,48 @@ export default function AdminPage(): React.ReactElement {
     })
   }, [currents, debouncedQuery, selectedDevice])
 
+  // Paginated filtered data for InfluxDB table
+  const paginatedFiltered = useMemo(() => {
+    const startIndex = (currentPageInflux - 1) * itemsPerPageInflux
+    const endIndex = startIndex + itemsPerPageInflux
+    return filtered.slice(startIndex, endIndex)
+  }, [filtered, currentPageInflux, itemsPerPageInflux])
+
+  const totalPagesInflux = Math.ceil(filtered.length / itemsPerPageInflux)
+
   const rows = useMemo(() => {
-    if (loading) return [<tr key="loading"><td colSpan={17} style={{ padding: 12, textAlign: 'center' }}>Loading…</td></tr>]
-    if (error) return [<tr key="error"><td colSpan={17} style={{ padding: 12, textAlign: 'center', color: '#b91c1c' }}>Error: {error}</td></tr>]
-    if (!loading && currents.length === 0) return [<tr key="none"><td colSpan={17} style={{ padding: 12, textAlign: 'center' }}>No recent metrics</td></tr>]
-    if (filtered.length === 0) return [<tr key="nomatch"><td colSpan={17} style={{ padding: 12, textAlign: 'center' }}>No matching metrics</td></tr>]
+    if (loading) return [<tr key="loading"><td colSpan={24} style={{ padding: 20, textAlign: 'center' }}>
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8 }}>
+        <div style={{
+          width: 20,
+          height: 20,
+          border: '3px solid #e5e7eb',
+          borderTop: '3px solid #2563eb',
+          borderRadius: '50%',
+          animation: 'spin 1s linear infinite'
+        }}></div>
+        <span style={{ color: '#6b7280' }}>Loading data...</span>
+      </div>
+    </td></tr>]
+    if (error) return [<tr key="error"><td colSpan={24} style={{ padding: 12, textAlign: 'center', color: '#b91c1c' }}>Error: {error}</td></tr>]
+    if (!loading && currents.length === 0) return [<tr key="none"><td colSpan={24} style={{ padding: 12, textAlign: 'center' }}>No recent metrics</td></tr>]
+    if (filtered.length === 0) return [<tr key="nomatch"><td colSpan={24} style={{ padding: 12, textAlign: 'center' }}>No matching metrics</td></tr>]
 
     const trs: React.ReactElement[] = []
     const totals = {
-      b_kWh: 0, b_P: 0, b_Q: 0, b_S: 0, b_PF: 0, b_THD: 0, b_F: 0,
-      m_kWh: 0, m_P: 0, m_Q: 0, m_S: 0, m_PF: 0, m_THD: 0, m_F: 0,
+      b_L1: 0, b_L2: 0, b_L3: 0, b_kWh: 0, b_P: 0, b_Q: 0, b_S: 0, b_PF: 0, b_THD: 0, b_F: 0,
+      m_L1: 0, m_L2: 0, m_L3: 0, m_kWh: 0, m_P: 0, m_Q: 0, m_S: 0, m_PF: 0, m_THD: 0, m_F: 0,
+      er: 0,
       count: 0
     }
 
-    filtered.forEach((r: AnyObj, i: number) => {
+    paginatedFiltered.forEach((r: AnyObj, i: number) => {
       const before = r.power_before ?? r.before ?? {}
       const metrics = r.power_metrics ?? r.metrics ?? {}
 
+      const b_L1 = Number(before.L1 ?? before.l1 ?? r.power_before_L1 ?? 0) || 0
+      const b_L2 = Number(before.L2 ?? before.l2 ?? r.power_before_L2 ?? 0) || 0
+      const b_L3 = Number(before.L3 ?? before.l3 ?? r.power_before_L3 ?? 0) || 0
       const b_kWh = Number(before.kWh ?? before.kwh ?? r.power_before_kWh ?? r.kWh ?? 0) || 0
       const b_P = Number(before.P ?? before.p ?? before.active_power ?? r.power_before_P ?? r.P ?? 0) || 0
       const b_Q = Number(before.Q ?? before.q ?? before.reactive_power ?? r.power_before_Q ?? r.Q ?? 0) || 0
@@ -153,6 +291,9 @@ export default function AdminPage(): React.ReactElement {
       const b_THD = Number(before.THD ?? before.thd ?? before.total_harmonic_distortion ?? r.power_before_THD ?? r.THD ?? 0) || 0
       const b_F = Number(before.F ?? before.f ?? before.freq ?? before.frequency ?? r.power_before_F ?? r.F ?? 0) || 0
 
+      const m_L1 = Number(metrics.L1 ?? metrics.l1 ?? r.power_metrics_L1 ?? 0) || 0
+      const m_L2 = Number(metrics.L2 ?? metrics.l2 ?? r.power_metrics_L2 ?? 0) || 0
+      const m_L3 = Number(metrics.L3 ?? metrics.l3 ?? r.power_metrics_L3 ?? 0) || 0
       const m_kWh = Number(metrics.kWh ?? metrics.kwh ?? r.power_metrics_kWh ?? r.kWh ?? 0) || 0
       const m_P = Number(metrics.P ?? metrics.p ?? metrics.active_power ?? r.power_metrics_P ?? r.P ?? 0) || 0
       const m_Q = Number(metrics.Q ?? metrics.q ?? metrics.reactive_power ?? r.power_metrics_Q ?? r.Q ?? 0) || 0
@@ -161,6 +302,11 @@ export default function AdminPage(): React.ReactElement {
       const m_THD = Number(metrics.THD ?? metrics.thd ?? metrics.total_harmonic_distortion ?? r.power_metrics_THD ?? r.THD ?? 0) || 0
       const m_F = Number(metrics.F ?? metrics.f ?? metrics.freq ?? metrics.frequency ?? r.power_metrics_F ?? r.F ?? 0) || 0
 
+      const er = Number(r.er ?? r.ER ?? r.efficiency_ratio ?? 0) || 0
+
+      totals.b_L1 += b_L1
+      totals.b_L2 += b_L2
+      totals.b_L3 += b_L3
       totals.b_kWh += b_kWh
       totals.b_P += b_P
       totals.b_Q += b_Q
@@ -169,6 +315,9 @@ export default function AdminPage(): React.ReactElement {
       totals.b_THD += b_THD
       totals.b_F += b_F
 
+      totals.m_L1 += m_L1
+      totals.m_L2 += m_L2
+      totals.m_L3 += m_L3
       totals.m_kWh += m_kWh
       totals.m_P += m_P
       totals.m_Q += m_Q
@@ -176,6 +325,8 @@ export default function AdminPage(): React.ReactElement {
       totals.m_PF += m_PF
       totals.m_THD += m_THD
       totals.m_F += m_F
+
+      totals.er += er
 
       totals.count += 1
 
@@ -185,6 +336,9 @@ export default function AdminPage(): React.ReactElement {
           <td style={{ border: '1px solid #e5e7eb', padding: 8 }}>{r.device || r.ksave || '-'}</td>
           <td style={{ border: '1px solid #e5e7eb', padding: 8 }}>{r.location || '-'}</td>
 
+          <td style={{ border: '1px solid #e5e7eb', padding: 8, textAlign: 'right' }}>{Number.isFinite(b_L1) ? b_L1.toFixed(3) : '-'}</td>
+          <td style={{ border: '1px solid #e5e7eb', padding: 8, textAlign: 'right' }}>{Number.isFinite(b_L2) ? b_L2.toFixed(3) : '-'}</td>
+          <td style={{ border: '1px solid #e5e7eb', padding: 8, textAlign: 'right' }}>{Number.isFinite(b_L3) ? b_L3.toFixed(3) : '-'}</td>
           <td style={{ border: '1px solid #e5e7eb', padding: 8, textAlign: 'right' }}>{Number.isFinite(b_kWh) ? b_kWh.toFixed(3) : '-'}</td>
           <td style={{ border: '1px solid #e5e7eb', padding: 8, textAlign: 'right' }}>{Number.isFinite(b_P) ? b_P.toFixed(3) : '-'}</td>
           <td style={{ border: '1px solid #e5e7eb', padding: 8, textAlign: 'right' }}>{Number.isFinite(b_Q) ? b_Q.toFixed(3) : '-'}</td>
@@ -193,6 +347,9 @@ export default function AdminPage(): React.ReactElement {
           <td style={{ border: '1px solid #e5e7eb', padding: 8, textAlign: 'right' }}>{Number.isFinite(b_THD) ? b_THD.toFixed(3) : '-'}</td>
           <td style={{ border: '1px solid #e5e7eb', padding: 8, textAlign: 'right' }}>{Number.isFinite(b_F) ? b_F.toFixed(3) : '-'}</td>
 
+          <td style={{ border: '1px solid #e5e7eb', padding: 8, textAlign: 'right' }}>{Number.isFinite(m_L1) ? m_L1.toFixed(3) : '-'}</td>
+          <td style={{ border: '1px solid #e5e7eb', padding: 8, textAlign: 'right' }}>{Number.isFinite(m_L2) ? m_L2.toFixed(3) : '-'}</td>
+          <td style={{ border: '1px solid #e5e7eb', padding: 8, textAlign: 'right' }}>{Number.isFinite(m_L3) ? m_L3.toFixed(3) : '-'}</td>
           <td style={{ border: '1px solid #e5e7eb', padding: 8, textAlign: 'right' }}>{Number.isFinite(m_kWh) ? m_kWh.toFixed(3) : '-'}</td>
           <td style={{ border: '1px solid #e5e7eb', padding: 8, textAlign: 'right' }}>{Number.isFinite(m_P) ? m_P.toFixed(3) : '-'}</td>
           <td style={{ border: '1px solid #e5e7eb', padding: 8, textAlign: 'right' }}>{Number.isFinite(m_Q) ? m_Q.toFixed(3) : '-'}</td>
@@ -200,11 +357,13 @@ export default function AdminPage(): React.ReactElement {
           <td style={{ border: '1px solid #e5e7eb', padding: 8, textAlign: 'right' }}>{Number.isFinite(m_PF) ? m_PF.toFixed(3) : '-'}</td>
           <td style={{ border: '1px solid #e5e7eb', padding: 8, textAlign: 'right' }}>{Number.isFinite(m_THD) ? m_THD.toFixed(3) : '-'}</td>
           <td style={{ border: '1px solid #e5e7eb', padding: 8, textAlign: 'right' }}>{Number.isFinite(m_F) ? m_F.toFixed(3) : '-'}</td>
+
+          <td style={{ border: '1px solid #e5e7eb', padding: 8, textAlign: 'right' }}>{Number.isFinite(er) ? er.toFixed(3) : '-'}</td>
         </tr>
       )
     })
 
-    // totals row (sums for kWh, P, Q, S; averages for PF, THD, F)
+    // totals row (sums for L1, L2, L3, kWh, P, Q, S, ER; averages for PF, THD, F)
     const cnt = totals.count || 1
     const avg = (v: number) => (cnt ? (v / cnt) : 0)
     trs.push(
@@ -213,6 +372,9 @@ export default function AdminPage(): React.ReactElement {
         <td style={{ border: '1px solid #e5e7eb', padding: 8 }}></td>
         <td style={{ border: '1px solid #e5e7eb', padding: 8 }}></td>
 
+        <td style={{ border: '1px solid #e5e7eb', padding: 8, textAlign: 'right' }}>{totals.b_L1.toFixed(3)}</td>
+        <td style={{ border: '1px solid #e5e7eb', padding: 8, textAlign: 'right' }}>{totals.b_L2.toFixed(3)}</td>
+        <td style={{ border: '1px solid #e5e7eb', padding: 8, textAlign: 'right' }}>{totals.b_L3.toFixed(3)}</td>
         <td style={{ border: '1px solid #e5e7eb', padding: 8, textAlign: 'right' }}>{totals.b_kWh.toFixed(3)}</td>
         <td style={{ border: '1px solid #e5e7eb', padding: 8, textAlign: 'right' }}>{totals.b_P.toFixed(3)}</td>
         <td style={{ border: '1px solid #e5e7eb', padding: 8, textAlign: 'right' }}>{totals.b_Q.toFixed(3)}</td>
@@ -221,6 +383,9 @@ export default function AdminPage(): React.ReactElement {
         <td style={{ border: '1px solid #e5e7eb', padding: 8, textAlign: 'right' }}>{avg(totals.b_THD).toFixed(3)}</td>
         <td style={{ border: '1px solid #e5e7eb', padding: 8, textAlign: 'right' }}>{avg(totals.b_F).toFixed(3)}</td>
 
+        <td style={{ border: '1px solid #e5e7eb', padding: 8, textAlign: 'right' }}>{totals.m_L1.toFixed(3)}</td>
+        <td style={{ border: '1px solid #e5e7eb', padding: 8, textAlign: 'right' }}>{totals.m_L2.toFixed(3)}</td>
+        <td style={{ border: '1px solid #e5e7eb', padding: 8, textAlign: 'right' }}>{totals.m_L3.toFixed(3)}</td>
         <td style={{ border: '1px solid #e5e7eb', padding: 8, textAlign: 'right' }}>{totals.m_kWh.toFixed(3)}</td>
         <td style={{ border: '1px solid #e5e7eb', padding: 8, textAlign: 'right' }}>{totals.m_P.toFixed(3)}</td>
         <td style={{ border: '1px solid #e5e7eb', padding: 8, textAlign: 'right' }}>{totals.m_Q.toFixed(3)}</td>
@@ -228,6 +393,8 @@ export default function AdminPage(): React.ReactElement {
         <td style={{ border: '1px solid #e5e7eb', padding: 8, textAlign: 'right' }}>{avg(totals.m_PF).toFixed(3)}</td>
         <td style={{ border: '1px solid #e5e7eb', padding: 8, textAlign: 'right' }}>{avg(totals.m_THD).toFixed(3)}</td>
         <td style={{ border: '1px solid #e5e7eb', padding: 8, textAlign: 'right' }}>{avg(totals.m_F).toFixed(3)}</td>
+
+        <td style={{ border: '1px solid #e5e7eb', padding: 8, textAlign: 'right' }}>{totals.er.toFixed(3)}</td>
       </tr>
     )
 
@@ -242,6 +409,7 @@ export default function AdminPage(): React.ReactElement {
           <Link href="/sites" className="k-btn k-btn-ghost crisp-text">Back to Sites</Link>
           <Link href="/add-machine" className="k-btn k-btn-ghost crisp-text">Add Machine</Link>
           <Link href="/admin/set-values" className="k-btn k-btn-ghost crisp-text">Add Value</Link>
+          <Link href="/admin/database" className="k-btn k-btn-ghost crisp-text">Database</Link>
 
           <button className="k-btn k-btn-primary crisp-text" onClick={handleLogout}>
             {token ? 'Logout' : 'Exit'}
@@ -272,13 +440,202 @@ export default function AdminPage(): React.ReactElement {
       </section>
 
       <section style={{ marginTop: 18 }}>
-       
+        {/* Database Device Status Section */}
+        <div className="data-card">
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            <h3 style={{ margin: 0 }}>Device Status (PostgreSQL)</h3>
+            <div style={{ fontSize: 14, color: '#6b7280' }}>
+              {dbLoading ? 'Loading...' : `Last updated: ${new Date().toLocaleTimeString()}`}
+            </div>
+          </div>
+
+          {dbError && (
+            <div style={{ marginTop: 12, padding: 12, background: '#fee2e2', color: '#b91c1c', borderRadius: 6 }}>
+              Error loading database: {dbError}
+            </div>
+          )}
+
+          <div style={{ marginTop: 12 }} className="k-table-wrapper">
+            <table className="k-table">
+              <thead style={{ background: '#f8fafc' }}>
+                <tr>
+                  <th rowSpan={2} style={{ padding: 8, textAlign: 'left', border: '1px solid #e5e7eb' }}>Device Name</th>
+                  <th rowSpan={2} style={{ padding: 8, textAlign: 'left', border: '1px solid #e5e7eb' }}>KSAVE ID</th>
+                  <th rowSpan={2} style={{ padding: 8, textAlign: 'left', border: '1px solid #e5e7eb' }}>Location</th>
+                  <th rowSpan={2} style={{ padding: 8, textAlign: 'left', border: '1px solid #e5e7eb' }}>Status</th>
+                  <th colSpan={3} style={{ padding: 8, textAlign: 'center', border: '1px solid #e5e7eb', background: '#fef3c7' }}>Power Before</th>
+                  <th colSpan={3} style={{ padding: 8, textAlign: 'center', border: '1px solid #e5e7eb', background: '#dbeafe' }}>Power Metrics</th>
+                  <th rowSpan={2} style={{ padding: 8, textAlign: 'center', border: '1px solid #e5e7eb' }}>ER</th>
+                  <th rowSpan={2} style={{ padding: 8, textAlign: 'left', border: '1px solid #e5e7eb' }}>Last Update</th>
+                </tr>
+                <tr>
+                  <th style={{ padding: 8, textAlign: 'right', border: '1px solid #e5e7eb', background: '#fef3c7' }}>P (kW)</th>
+                  <th style={{ padding: 8, textAlign: 'right', border: '1px solid #e5e7eb', background: '#fef3c7' }}>Q (kVAR)</th>
+                  <th style={{ padding: 8, textAlign: 'right', border: '1px solid #e5e7eb', background: '#fef3c7' }}>S (kVA)</th>
+                  <th style={{ padding: 8, textAlign: 'right', border: '1px solid #e5e7eb', background: '#dbeafe' }}>P (kW)</th>
+                  <th style={{ padding: 8, textAlign: 'right', border: '1px solid #e5e7eb', background: '#dbeafe' }}>Q (kVAR)</th>
+                  <th style={{ padding: 8, textAlign: 'right', border: '1px solid #e5e7eb', background: '#dbeafe' }}>S (kVA)</th>
+                </tr>
+              </thead>
+              <tbody>
+                {dbLoading && mergedDeviceData.length === 0 ? (
+                  <tr>
+                    <td colSpan={11} style={{ padding: 20, textAlign: 'center' }}>
+                      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8 }}>
+                        <div style={{
+                          width: 20,
+                          height: 20,
+                          border: '3px solid #e5e7eb',
+                          borderTop: '3px solid #2563eb',
+                          borderRadius: '50%',
+                          animation: 'spin 1s linear infinite'
+                        }}></div>
+                        <span style={{ color: '#6b7280' }}>Loading database...</span>
+                      </div>
+                    </td>
+                  </tr>
+                ) : mergedDeviceData.length === 0 ? (
+                  <tr>
+                    <td colSpan={11} style={{ padding: 12, textAlign: 'center' }}>No devices found in database</td>
+                  </tr>
+                ) : (
+                  paginatedDBData.map((device, i) => {
+                    const metric = device.latestMetric
+                    const deviceData = device as any
+                    const statusColor = deviceData.status === 'ON' ? '#10B981' : '#EF4444'
+                    return (
+                      <tr key={i} style={{ borderTop: '1px solid #f1f5f9' }}>
+                        <td style={{ border: '1px solid #e5e7eb', padding: 8 }}>{deviceData.devicename || '-'}</td>
+                        <td style={{ border: '1px solid #e5e7eb', padding: 8 }}>{deviceData.ksaveid || '-'}</td>
+                        <td style={{ border: '1px solid #e5e7eb', padding: 8 }}>{metric?.location || deviceData.location || '-'}</td>
+                        <td style={{ border: '1px solid #e5e7eb', padding: 8 }}>
+                          <span style={{
+                            display: 'inline-block',
+                            padding: '4px 8px',
+                            borderRadius: 4,
+                            background: statusColor,
+                            color: '#fff',
+                            fontSize: 12,
+                            fontWeight: 600
+                          }}>
+                            {deviceData.status || '-'}
+                          </span>
+                        </td>
+                        <td style={{ border: '1px solid #e5e7eb', padding: 8, textAlign: 'right', background: '#fffbeb' }}>
+                          {metric?.before_p != null ? Number(metric.before_p).toFixed(2) : '-'}
+                        </td>
+                        <td style={{ border: '1px solid #e5e7eb', padding: 8, textAlign: 'right', background: '#fffbeb' }}>
+                          {metric?.before_q != null ? Number(metric.before_q).toFixed(2) : '-'}
+                        </td>
+                        <td style={{ border: '1px solid #e5e7eb', padding: 8, textAlign: 'right', background: '#fffbeb' }}>
+                          {metric?.before_s != null ? Number(metric.before_s).toFixed(2) : '-'}
+                        </td>
+                        <td style={{ border: '1px solid #e5e7eb', padding: 8, textAlign: 'right', background: '#eff6ff' }}>
+                          {metric?.metrics_p != null ? Number(metric.metrics_p).toFixed(2) : '-'}
+                        </td>
+                        <td style={{ border: '1px solid #e5e7eb', padding: 8, textAlign: 'right', background: '#eff6ff' }}>
+                          {metric?.metrics_q != null ? Number(metric.metrics_q).toFixed(2) : '-'}
+                        </td>
+                        <td style={{ border: '1px solid #e5e7eb', padding: 8, textAlign: 'right', background: '#eff6ff' }}>
+                          {metric?.metrics_s != null ? Number(metric.metrics_s).toFixed(2) : '-'}
+                        </td>
+                        <td style={{ border: '1px solid #e5e7eb', padding: 8, textAlign: 'right', fontWeight: 600, color: metric?.er > 0 ? '#059669' : '#6b7280' }}>
+                          {metric?.er != null ? Number(metric.er).toFixed(2) : '-'}
+                        </td>
+                        <td style={{ border: '1px solid #e5e7eb', padding: 8 }}>
+                          {metric?.timestamp ? new Date(metric.timestamp).toLocaleString() : '-'}
+                        </td>
+                      </tr>
+                    )
+                  })
+                )}
+              </tbody>
+            </table>
+          </div>
+          
+          {/* Database Pagination Controls */}
+          {mergedDeviceData.length > 0 && (
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: 12, padding: '0 8px' }}>
+              <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+                <label style={{ fontSize: 14, color: '#374151' }}>Items per page:</label>
+                <select 
+                  className="k-input" 
+                  style={{ width: 80, padding: '4px 8px' }}
+                  value={itemsPerPageDB} 
+                  onChange={(e) => {
+                    setItemsPerPageDB(Number(e.target.value))
+                    setCurrentPageDB(1)
+                  }}
+                >
+                  <option value={5}>5</option>
+                  <option value={10}>10</option>
+                  <option value={20}>20</option>
+                  <option value={50}>50</option>
+                </select>
+                <span style={{ fontSize: 14, color: '#6b7280' }}>
+                  Showing {((currentPageDB - 1) * itemsPerPageDB) + 1} - {Math.min(currentPageDB * itemsPerPageDB, mergedDeviceData.length)} of {mergedDeviceData.length}
+                </span>
+              </div>
+              
+              <div style={{ display: 'flex', gap: 4 }}>
+                <button 
+                  className="k-btn k-btn-ghost" 
+                  style={{ padding: '6px 12px', fontSize: 14 }}
+                  onClick={() => setCurrentPageDB(Math.max(1, currentPageDB - 1))}
+                  disabled={currentPageDB === 1}
+                >
+                  ← Previous
+                </button>
+                
+                {Array.from({ length: Math.min(5, totalPagesDB) }, (_, i) => {
+                  let pageNum
+                  if (totalPagesDB <= 5) {
+                    pageNum = i + 1
+                  } else if (currentPageDB <= 3) {
+                    pageNum = i + 1
+                  } else if (currentPageDB >= totalPagesDB - 2) {
+                    pageNum = totalPagesDB - 4 + i
+                  } else {
+                    pageNum = currentPageDB - 2 + i
+                  }
+                  
+                  return (
+                    <button
+                      key={pageNum}
+                      className="k-btn"
+                      style={{
+                        padding: '6px 12px',
+                        fontSize: 14,
+                        background: currentPageDB === pageNum ? '#2563eb' : 'transparent',
+                        color: currentPageDB === pageNum ? '#fff' : '#374151'
+                      }}
+                      onClick={() => setCurrentPageDB(pageNum)}
+                    >
+                      {pageNum}
+                    </button>
+                  )
+                })}
+                
+                <button 
+                  className="k-btn k-btn-ghost" 
+                  style={{ padding: '6px 12px', fontSize: 14 }}
+                  onClick={() => setCurrentPageDB(Math.min(totalPagesDB, currentPageDB + 1))}
+                  disabled={currentPageDB === totalPagesDB}
+                >
+                  Next →
+                </button>
+              </div>
+            </div>
+          )}
+        </div>
 
         <div style={{ marginTop: 18 }} className="data-card">
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
             <h3 style={{ margin: 0 }}>Current readings (from Influx)</h3>
             <div className="controls-right" style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
-             
+              <div style={{ fontSize: 14, color: '#6b7280' }}>
+                {loading ? 'Loading...' : lastInfluxUpdate ? `Last updated: ${lastInfluxUpdate.toLocaleTimeString()}` : 'No data'}
+              </div>
             </div>
           </div>
 
@@ -302,7 +659,7 @@ export default function AdminPage(): React.ReactElement {
           <div className="search-controls" style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
             <select className="k-input narrow" value={selectedDevice} onChange={(e) => setSelectedDevice(e.target.value)}>
               <option value="all">All devices</option>
-              {devices.map((d) => (
+              {devicesFromInflux.map((d) => (
                 <option key={d} value={d}>{d}</option>
               ))}
             </select>
@@ -328,6 +685,7 @@ export default function AdminPage(): React.ReactElement {
                   setError(body?.error || 'Failed to load currents')
                 } else {
                   setCurrents(body.rows || body || [])
+                  setLastInfluxUpdate(new Date())
                 }
               } catch (err: any) {
                 setError(String(err?.message || err))
@@ -342,23 +700,109 @@ export default function AdminPage(): React.ReactElement {
                 <th rowSpan={2} style={{ padding: 8, textAlign: 'left', border: '1px solid #e5e7eb' }}>Time</th>
                 <th rowSpan={2} style={{ padding: 8, textAlign: 'left', border: '1px solid #e5e7eb' }}>Device</th>
                 <th rowSpan={2} style={{ padding: 8, textAlign: 'left', border: '1px solid #e5e7eb' }}>Site</th>
-                <th colSpan={7} className="power-group-header" style={{ padding: 8, textAlign: 'center', border: '1px solid #e5e7eb' }}>Power (before)</th>
-                <th colSpan={7} className="power-group-header" style={{ padding: 8, textAlign: 'center', border: '1px solid #e5e7eb' }}>Power (metrics)</th>
+                <th colSpan={10} className="power-group-header" style={{ padding: 8, textAlign: 'center', border: '1px solid #e5e7eb' }}>Power (before)</th>
+                <th colSpan={10} className="power-group-header" style={{ padding: 8, textAlign: 'center', border: '1px solid #e5e7eb' }}>Power (metrics)</th>
+                <th rowSpan={2} style={{ padding: 8, textAlign: 'center', border: '1px solid #e5e7eb' }}>ER</th>
               </tr>
               <tr>
-                {['kWh','P','Q','S','PF','THD','F'].map((c) => (
-                  <th key={`before-${c}`} style={{ padding: 8, textAlign: c === 'kWh' ? 'right' : 'right', border: '1px solid #e5e7eb' }}>{c}</th>
+                {['L1','L2','L3','kWh','P','Q','S','PF','THD','F'].map((c) => (
+                  <th key={`before-${c}`} style={{ padding: 8, textAlign: 'right', border: '1px solid #e5e7eb' }}>{c}</th>
                 ))}
-                {['kWh','P','Q','S','PF','THD','F'].map((c) => (
-                  <th key={`metrics-${c}`} style={{ padding: 8, textAlign: c === 'kWh' ? 'right' : 'right', border: '1px solid #e5e7eb' }}>{c}</th>
+                {['L1','L2','L3','kWh','P','Q','S','PF','THD','F'].map((c) => (
+                  <th key={`metrics-${c}`} style={{ padding: 8, textAlign: 'right', border: '1px solid #e5e7eb' }}>{c}</th>
                 ))}
               </tr>
             </thead>
             <tbody>{rows}</tbody>
           </table>
         </div>
+        
+        {/* InfluxDB Pagination Controls */}
+        {!loading && filtered.length > 0 && (
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: 12, padding: '0 8px' }}>
+            <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+              <label style={{ fontSize: 14, color: '#374151' }}>Items per page:</label>
+              <select 
+                className="k-input" 
+                style={{ width: 80, padding: '4px 8px' }}
+                value={itemsPerPageInflux} 
+                onChange={(e) => {
+                  setItemsPerPageInflux(Number(e.target.value))
+                  setCurrentPageInflux(1)
+                }}
+              >
+                <option value={10}>10</option>
+                <option value={20}>20</option>
+                <option value={50}>50</option>
+                <option value={100}>100</option>
+              </select>
+              <span style={{ fontSize: 14, color: '#6b7280' }}>
+                Showing {((currentPageInflux - 1) * itemsPerPageInflux) + 1} - {Math.min(currentPageInflux * itemsPerPageInflux, filtered.length)} of {filtered.length}
+              </span>
+            </div>
+            
+            <div style={{ display: 'flex', gap: 4 }}>
+              <button 
+                className="k-btn k-btn-ghost" 
+                style={{ padding: '6px 12px', fontSize: 14 }}
+                onClick={() => setCurrentPageInflux(Math.max(1, currentPageInflux - 1))}
+                disabled={currentPageInflux === 1}
+              >
+                ← Previous
+              </button>
+              
+              {Array.from({ length: Math.min(5, totalPagesInflux) }, (_, i) => {
+                let pageNum
+                if (totalPagesInflux <= 5) {
+                  pageNum = i + 1
+                } else if (currentPageInflux <= 3) {
+                  pageNum = i + 1
+                } else if (currentPageInflux >= totalPagesInflux - 2) {
+                  pageNum = totalPagesInflux - 4 + i
+                } else {
+                  pageNum = currentPageInflux - 2 + i
+                }
+                
+                return (
+                  <button
+                    key={pageNum}
+                    className="k-btn"
+                    style={{
+                      padding: '6px 12px',
+                      fontSize: 14,
+                      background: currentPageInflux === pageNum ? '#2563eb' : 'transparent',
+                      color: currentPageInflux === pageNum ? '#fff' : '#374151'
+                    }}
+                    onClick={() => setCurrentPageInflux(pageNum)}
+                  >
+                    {pageNum}
+                  </button>
+                )
+              })}
+              
+              <button 
+                className="k-btn k-btn-ghost" 
+                style={{ padding: '6px 12px', fontSize: 14 }}
+                onClick={() => setCurrentPageInflux(Math.min(totalPagesInflux, currentPageInflux + 1))}
+                disabled={currentPageInflux === totalPagesInflux}
+              >
+                Next →
+              </button>
+            </div>
+          </div>
+        )}
         </div>
       </section>
+      
+      <style>{`
+        @keyframes spin {
+          0% { transform: rotate(0deg); }
+          100% { transform: rotate(360deg); }
+        }
+      `}</style>
+
+      {/* InfluxDB to PostgreSQL Real-time Sync Component */}
+      <InfluxToPostgresSync />
     </div>
   )
 }
