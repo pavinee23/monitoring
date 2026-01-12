@@ -350,7 +350,7 @@ const styles: { [k: string]: React.CSSProperties } = {
 	logoCircle: {
 		width: 140,
 		height: 140,
-		borderRadius: '50%',
+		borderRadius: 16,
 		background: '#ffffff',
 		margin: '0 auto 16px',
 		display: 'flex',
@@ -365,7 +365,7 @@ const styles: { [k: string]: React.CSSProperties } = {
 		width: '100%',
 		height: '100%',
 		objectFit: 'contain',
-		borderRadius: '50%'
+		borderRadius: 8
 	},
 	brandName: {
 		margin: 0,
