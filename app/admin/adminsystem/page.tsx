@@ -14,43 +14,28 @@ export default function AdminLoginPage() {
     e.preventDefault()
     setError(null)
     setLoading(true)
-    try {
-      const res = await fetch('/api/admin/login', {
-        method: 'POST',
-        headers: { 'content-type': 'application/json' },
-        body: JSON.stringify({ username, password }),
-      })
-      let body: any = null
-      try {
-        body = await res.json()
-      } catch (parseErr) {
-        console.error('Failed to parse login response JSON', parseErr)
-      }
-      console.log('Login response', res.status, body)
-      if (!res.ok) {
-        const msg = body?.error || `Login failed (status ${res.status})`
-        setError(msg)
+
+    // Temporary hardcoded authentication (bypassing API)
+    setTimeout(() => {
+      // Check credentials (temporary simple validation)
+      if (username === 'admin' && password === '9999') {
+        try {
+          // Store temporary token
+          localStorage.setItem('k_system_admin_token', 'temp_token_' + Date.now())
+          console.log('Login successful (temporary bypass)')
+
+          // Redirect to admin main page
+          router.push('/admin/main')
+        } catch (err) {
+          console.error('Failed to store token:', err)
+          setError('Failed to store authentication token')
+          setLoading(false)
+        }
+      } else {
+        setError('Invalid username or password')
         setLoading(false)
-        return
       }
-      // store token and redirect to admin login success page
-      try {
-        localStorage.setItem('k_system_admin_token', body.token)
-        console.log('Login successful, token stored:', body.token)
-      } catch (err) {
-        console.error('Failed to store token:', err)
-        setError('Failed to store authentication token')
-        setLoading(false)
-        return
-      }
-      console.log('Redirecting to admin page...')
-      // redirect to admin page after successful login
-      router.push('/admin')
-    } catch (err) {
-      console.error('Login request failed:', err)
-      setError('Network error - please check connection')
-      setLoading(false)
-    }
+    }, 500) // Simulate loading delay
   }
 
   return (
