@@ -282,6 +282,8 @@ export default function AddMachinePage() {
                     <th style={{ padding: '12px 8px', textAlign: 'left', fontWeight: 600, color: '#374151' }}>KSAVE ID</th>
                     <th style={{ padding: '12px 8px', textAlign: 'left', fontWeight: 600, color: '#374151' }}>Location</th>
                     <th style={{ padding: '12px 8px', textAlign: 'left', fontWeight: 600, color: '#374151' }}>Phone</th>
+                    <th style={{ padding: '12px 8px', textAlign: 'left', fontWeight: 600, color: '#374151' }}>Email</th>
+                    <th style={{ padding: '12px 8px', textAlign: 'left', fontWeight: 600, color: '#374151' }}>Password</th>
                     <th style={{ padding: '12px 8px', textAlign: 'center', fontWeight: 600, color: '#374151' }}>Status</th>
                     <th style={{ padding: '12px 8px', textAlign: 'center', fontWeight: 600, color: '#374151' }}>Actions</th>
                   </tr>
@@ -321,6 +323,24 @@ export default function AddMachinePage() {
                             value={editPhone} 
                             onChange={(e) => setEditPhone(e.target.value)}
                             style={{ width: '100%', padding: '6px', border: '1px solid #d1d5db', borderRadius: 4, fontSize: 13 }}
+                          />
+                        </td>
+                        <td style={{ padding: '8px' }}>
+                          <input 
+                            type="email" 
+                            value={editEmail} 
+                            onChange={(e) => setEditEmail(e.target.value)}
+                            style={{ width: '100%', padding: '6px', border: '1px solid #d1d5db', borderRadius: 4, fontSize: 13 }}
+                            placeholder="Email"
+                          />
+                        </td>
+                        <td style={{ padding: '8px' }}>
+                          <input 
+                            type="password" 
+                            value={editPassword} 
+                            onChange={(e) => setEditPassword(e.target.value)}
+                            style={{ width: '100%', padding: '6px', border: '1px solid #d1d5db', borderRadius: 4, fontSize: 13 }}
+                            placeholder="Password"
                           />
                         </td>
                         <td style={{ padding: '8px' }}>
@@ -392,6 +412,12 @@ export default function AddMachinePage() {
                         </td>
                         <td style={{ padding: '12px 8px', color: '#6b7280' }}>
                           {machine.phone || '—'}
+                        </td>
+                        <td style={{ padding: '12px 8px', color: '#6b7280' }}>
+                          {machine.U_email || machine.P_email || '—'}
+                        </td>
+                        <td style={{ padding: '12px 8px', color: '#6b7280', fontFamily: 'monospace' }}>
+                          {machine.pass_phone ? '••••••••' : '—'}
                         </td>
                         <td style={{ padding: '12px 8px', textAlign: 'center' }}>
                           <span style={{

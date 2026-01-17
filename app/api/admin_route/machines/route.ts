@@ -115,7 +115,7 @@ export async function GET(req: Request) {
     const offset = parseInt(url.searchParams.get('offset') || '0')
 
     const devices = await query(`
-      SELECT deviceID, deviceName, ksaveID, ipAddress, location, phone, status, created_at, updated_at
+      SELECT deviceID, deviceName, ksaveID, ipAddress, location, phone, U_email, P_email, pass_phone, status, created_at, updated_at
       FROM devices
       ORDER BY created_at DESC
       LIMIT ? OFFSET ?
