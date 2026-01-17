@@ -1,6 +1,13 @@
-import UserLogin from './user/UserLogin'
+'use client'
+
+import { useEffect } from 'react'
 
 export default function Page() {
-  return <UserLogin />
+  useEffect(() => {
+    window.location.replace('/main.html')
+  }, [])
+
+  return null
 }
+
 

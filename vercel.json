@@ -1,13 +1,8 @@
 {
   "version": 2,
-  "public": true,
-  "cleanUrls": true,
-  "routes": [
-    {
-      "src": "/",
-      "dest": "/public/index.html"
-    }
-  ],
+  "buildCommand": "npm run build",
+  "outputDirectory": ".next",
+  "framework": "nextjs",
   "env": {
     "INFLUXDB_URL": "@influxdb_url",
     "INFLUXDB_TOKEN": "@influxdb_token",
