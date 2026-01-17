@@ -15,27 +15,40 @@ export default function AdminLoginPage() {
     setError(null)
     setLoading(true)
 
-    // Temporary hardcoded authentication (bypassing API)
-    setTimeout(() => {
-      // Check credentials (temporary simple validation)
-      if (username === 'admin' && password === '9999') {
-        try {
-          // Store temporary token
-          localStorage.setItem('k_system_admin_token', 'temp_token_' + Date.now())
-          console.log('Login successful (temporary bypass)')
+    try {
+      // Call the API to authenticate
+      const res = await fetch('/api/admin_route/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ username, password })
+      })
 
-          // Redirect to admin main page
-          router.push('/admin/main')
-        } catch (err) {
-          console.error('Failed to store token:', err)
-          setError('Failed to store authentication token')
-          setLoading(false)
-        }
-      } else {
-        setError('Invalid username or password')
+      const data = await res.json()
+
+      if (!res.ok || data.error) {
+        setError(data.error || 'Invalid username or password')
         setLoading(false)
+        return
       }
-    }, 500) // Simulate loading delay
+
+      // Store token and user data
+      localStorage.setItem('k_system_admin_token', data.token || '')
+      localStorage.setItem('k_system_admin_user', JSON.stringify({
+        userId: data.userId,
+        username: data.username,
+        name: data.name,
+        typeID: data.typeID
+      }))
+
+      console.log('✅ Admin login successful')
+
+      // Redirect to admin main page
+      router.push('/admin/main')
+    } catch (err: any) {
+      console.error('❌ Login error:', err)
+      setError(err.message || 'Failed to connect to server')
+      setLoading(false)
+    }
   }
 
   return (
