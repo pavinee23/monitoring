@@ -33,6 +33,8 @@ export default function AdminLoginPage() {
 
       const data = await res.json()
 
+      console.log('🔍 Login response:', data)
+
       if (!res.ok || data.error) {
         setError(data.error || 'เข้าสู่ระบบไม่สำเร็จ')
         return
@@ -40,6 +42,7 @@ export default function AdminLoginPage() {
 
       // Check user's site from response data
       const userSite = (data.site || '').toLowerCase().trim()
+      console.log('🔍 User site:', userSite, 'typeID:', data.typeID)
 
       // Verify user's site is thailand or admin
       if (userSite !== 'thailand' && userSite !== 'admin') {
@@ -58,13 +61,19 @@ export default function AdminLoginPage() {
       }))
       localStorage.setItem('k_system_admin_token', data.token || '')
 
+      console.log('🔍 About to redirect - site:', userSite, 'typeID:', data.typeID)
+
       // Redirect based on typeID and site
       // For Thailand/Admin site logins, send to the new Thailand dashboard
       if (userSite === 'thailand' || userSite === 'admin') {
         if (data.typeID === 1 || data.typeID === 2) {
+          console.log('✅ Redirecting to Thailand dashboard')
           router.push('/Thailand/Admin-Login/dashboard')
+          return
         } else {
+          console.log('⚠️ Not admin - typeID:', data.typeID)
           router.push('/sites')
+          return
         }
       } else {
         // Fallback: send super/admin users to the global admin main
