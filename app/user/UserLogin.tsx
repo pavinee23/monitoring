@@ -48,9 +48,9 @@ export default function UserLogin() {
 				// Show success animation
 				setSuccess(true)
 
-				// Wait for animation then redirect
-				setTimeout(() => {
-					router.replace('/sites')
+			// Wait for animation then redirect to ngrok URL
+			setTimeout(() => {
+				window.location.href = 'https://strong-dory-enabled.ngrok-free.app/sites'
 				}, 1500)
 				return
 			}

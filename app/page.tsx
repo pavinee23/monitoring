@@ -423,7 +423,7 @@ export default function HomePage() {
               <h2 className="hero-subtitle">&quot;SAVINGS&quot; YOU CAN SEE</h2>
               <p className="hero-tagline">Cut your Electric Bill from day one!<br />Advanced power-saving technology with proven results</p>
               <div className="d-flex gap-3 justify-content-center flex-wrap">
-                <a href="https://strong-dory-enabled.ngrok-free.app" className="btn btn-custom-primary">
+                <a href="/login" className="btn btn-custom-primary">
                   <i className="bi bi-box-arrow-in-right me-2"></i>Login to Monitoring
                 </a>
                 <a href="#products" className="btn btn-custom-secondary">
