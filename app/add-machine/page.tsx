@@ -7,12 +7,22 @@ export default function AddMachinePage() {
   const [name, setName] = useState('')
   const [ksave, setKsave] = useState('')
   const [location, setLocation] = useState('')
+  const [phone, setPhone] = useState('')
   const [saving, setSaving] = useState(false)
   const [result, setResult] = useState<any | null>(null)
   const [error, setError] = useState<string | null>(null)
   const [success, setSuccess] = useState<string | null>(null)
   const [machines, setMachines] = useState<any[]>([])
   const [loadingMachines, setLoadingMachines] = useState(false)
+  
+  // Edit mode states
+  const [editingId, setEditingId] = useState<number | null>(null)
+  const [editName, setEditName] = useState('')
+  const [editKsave, setEditKsave] = useState('')
+  const [editLocation, setEditLocation] = useState('')
+  const [editPhone, setEditPhone] = useState('')
+  const [editStatus, setEditStatus] = useState('')
+  const [updating, setUpdating] = useState(false)
 
   // Fetch machines list from PostgreSQL
   async function fetchMachines() {
@@ -53,7 +63,7 @@ export default function AddMachinePage() {
       const res = await fetch('/api/admin_route/machines', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ name, ksave, location })
+        body: JSON.stringify({ name, ksave, location, phone })
       })
 
       // read response text for better error messages
@@ -85,6 +95,7 @@ export default function AddMachinePage() {
       setName('')
       setKsave('')
       setLocation('')
+      setPhone('')
       return body
     } catch (err: any) {
       const msg = err?.message || String(err)
@@ -102,6 +113,64 @@ export default function AddMachinePage() {
       await submitMachine()
     } catch (_) {
       // error already set
+    }
+  }
+
+  // Edit functions
+  function startEdit(machine: any) {
+    setEditingId(machine.deviceID)
+    setEditName(machine.deviceName || '')
+    setEditKsave(machine.ksaveID || '')
+    setEditLocation(machine.location || '')
+    setEditPhone(machine.phone || '')
+    setEditStatus(machine.status || 'OK')
+  }
+
+  function cancelEdit() {
+    setEditingId(null)
+    setEditName('')
+    setEditKsave('')
+    setEditLocation('')
+    setEditPhone('')
+    setEditStatus('')
+  }
+
+  async function saveEdit() {
+    if (!editingId) return
+    
+    setUpdating(true)
+    setError(null)
+    
+    try {
+      const res = await fetch(`/api/admin_route/machines?id=${editingId}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          deviceName: editName,
+          ksaveID: editKsave,
+          location: editLocation,
+          phone: editPhone,
+          status: editStatus
+        })
+      })
+
+      const data = await res.json()
+      
+      if (!res.ok) {
+        throw new Error(data.error || 'Update failed')
+      }
+
+      if (data.ok) {
+        setSuccess('Updated successfully')
+        setTimeout(() => setSuccess(null), 3000)
+        cancelEdit()
+        fetchMachines()
+      }
+    } catch (err: any) {
+      setError(`Update failed: ${err.message}`)
+      setTimeout(() => setError(null), 5000)
+    } finally {
+      setUpdating(false)
     }
   }
 
@@ -137,9 +206,14 @@ export default function AddMachinePage() {
           <input className="k-input" value={location} onChange={(e) => setLocation(e.target.value)} />
         </div>
 
+        <div style={{ marginBottom: 8 }}>
+          <label style={{ display: 'block', fontSize: 13 }}>Phone</label>
+          <input className="k-input" type="tel" value={phone} onChange={(e) => setPhone(e.target.value)} placeholder="Optional" />
+        </div>
+
         <div style={{ display: 'flex', gap: 8, marginTop: 12 }}>
           <button className="k-btn k-btn-primary" type="submit" disabled={saving || !name.trim() || !ksave.trim()}>{saving ? 'Saving...' : 'Create'}</button>
-          <button className="k-btn k-btn-ghost" type="button" onClick={() => { setName(''); setKsave(''); setLocation(''); setResult(null); setError(null) }}>Reset</button>
+          <button className="k-btn k-btn-ghost" type="button" onClick={() => { setName(''); setKsave(''); setLocation(''); setPhone(''); setResult(null); setError(null) }}>Reset</button>
         </div>
 
         {error && (
@@ -185,40 +259,151 @@ export default function AddMachinePage() {
                     <th style={{ padding: '12px 8px', textAlign: 'left', fontWeight: 600, color: '#374151' }}>Device Name</th>
                     <th style={{ padding: '12px 8px', textAlign: 'left', fontWeight: 600, color: '#374151' }}>KSAVE ID</th>
                     <th style={{ padding: '12px 8px', textAlign: 'left', fontWeight: 600, color: '#374151' }}>Location</th>
+                    <th style={{ padding: '12px 8px', textAlign: 'left', fontWeight: 600, color: '#374151' }}>Phone</th>
                     <th style={{ padding: '12px 8px', textAlign: 'center', fontWeight: 600, color: '#374151' }}>Status</th>
+                    <th style={{ padding: '12px 8px', textAlign: 'center', fontWeight: 600, color: '#374151' }}>Actions</th>
                   </tr>
                 </thead>
                 <tbody>
                   {machines.map((machine, idx) => (
-                    <tr
-                      key={machine.deviceID || idx}
-                      style={{
-                        borderBottom: '1px solid #f3f4f6',
-                        background: idx % 2 === 0 ? 'white' : '#f9fafb'
-                      }}
-                    >
-                      <td style={{ padding: '12px 8px', color: '#374151' }}>
-                        {machine.deviceName || '—'}
-                      </td>
-                      <td style={{ padding: '12px 8px', color: '#374151', fontFamily: 'monospace' }}>
-                        {machine.ksaveID || '—'}
-                      </td>
-                      <td style={{ padding: '12px 8px', color: '#6b7280' }}>
-                        {machine.location || '—'}
-                      </td>
-                      <td style={{ padding: '12px 8px', textAlign: 'center' }}>
-                        <span style={{
-                          padding: '4px 8px',
-                          borderRadius: 4,
-                          fontSize: 12,
-                          fontWeight: 500,
-                          background: machine.status === 'ON' || machine.status === 'active' ? '#dcfce7' : '#f3f4f6',
-                          color: machine.status === 'ON' || machine.status === 'active' ? '#166534' : '#6b7280'
-                        }}>
-                          {machine.status || 'unknown'}
-                        </span>
-                      </td>
-                    </tr>
+                    editingId === machine.deviceID ? (
+                      // Edit mode row
+                      <tr key={machine.deviceID || idx} style={{ background: '#fef3c7', borderBottom: '1px solid #fbbf24' }}>
+                        <td style={{ padding: '8px' }}>
+                          <input 
+                            type="text" 
+                            value={editName} 
+                            onChange={(e) => setEditName(e.target.value)}
+                            style={{ width: '100%', padding: '6px', border: '1px solid #d1d5db', borderRadius: 4, fontSize: 13 }}
+                          />
+                        </td>
+                        <td style={{ padding: '8px' }}>
+                          <input 
+                            type="text" 
+                            value={editKsave} 
+                            onChange={(e) => setEditKsave(e.target.value)}
+                            style={{ width: '100%', padding: '6px', border: '1px solid #d1d5db', borderRadius: 4, fontSize: 13 }}
+                          />
+                        </td>
+                        <td style={{ padding: '8px' }}>
+                          <input 
+                            type="text" 
+                            value={editLocation} 
+                            onChange={(e) => setEditLocation(e.target.value)}
+                            style={{ width: '100%', padding: '6px', border: '1px solid #d1d5db', borderRadius: 4, fontSize: 13 }}
+                          />
+                        </td>
+                        <td style={{ padding: '8px' }}>
+                          <input 
+                            type="text" 
+                            value={editPhone} 
+                            onChange={(e) => setEditPhone(e.target.value)}
+                            style={{ width: '100%', padding: '6px', border: '1px solid #d1d5db', borderRadius: 4, fontSize: 13 }}
+                          />
+                        </td>
+                        <td style={{ padding: '8px' }}>
+                          <select 
+                            value={editStatus} 
+                            onChange={(e) => setEditStatus(e.target.value)}
+                            style={{ width: '100%', padding: '6px', border: '1px solid #d1d5db', borderRadius: 4, fontSize: 13 }}
+                          >
+                            <option value="OK">OK</option>
+                            <option value="ON">ON</option>
+                            <option value="OFF">OFF</option>
+                            <option value="active">Active</option>
+                            <option value="inactive">Inactive</option>
+                          </select>
+                        </td>
+                        <td style={{ padding: '8px', textAlign: 'center' }}>
+                          <div style={{ display: 'flex', gap: 4, justifyContent: 'center' }}>
+                            <button 
+                              onClick={saveEdit}
+                              disabled={updating || !editName.trim() || !editKsave.trim()}
+                              style={{ 
+                                padding: '6px 12px', 
+                                borderRadius: 4, 
+                                border: 'none', 
+                                background: '#10b981', 
+                                color: 'white', 
+                                cursor: updating ? 'not-allowed' : 'pointer',
+                                fontSize: 12,
+                                fontWeight: 500
+                              }}
+                            >
+                              {updating ? '...' : '💾 Save'}
+                            </button>
+                            <button 
+                              onClick={cancelEdit}
+                              disabled={updating}
+                              style={{ 
+                                padding: '6px 12px', 
+                                borderRadius: 4, 
+                                border: '1px solid #d1d5db', 
+                                background: 'white', 
+                                color: '#6b7280', 
+                                cursor: 'pointer',
+                                fontSize: 12
+                              }}
+                            >
+                              Cancel
+                            </button>
+                          </div>
+                        </td>
+                      </tr>
+                    ) : (
+                      // Normal view row
+                      <tr
+                        key={machine.deviceID || idx}
+                        style={{
+                          borderBottom: '1px solid #f3f4f6',
+                          background: idx % 2 === 0 ? 'white' : '#f9fafb'
+                        }}
+                      >
+                        <td style={{ padding: '12px 8px', color: '#374151' }}>
+                          {machine.deviceName || '—'}
+                        </td>
+                        <td style={{ padding: '12px 8px', color: '#374151', fontFamily: 'monospace' }}>
+                          {machine.ksaveID || '—'}
+                        </td>
+                        <td style={{ padding: '12px 8px', color: '#6b7280' }}>
+                          {machine.location || '—'}
+                        </td>
+                        <td style={{ padding: '12px 8px', color: '#6b7280' }}>
+                          {machine.phone || '—'}
+                        </td>
+                        <td style={{ padding: '12px 8px', textAlign: 'center' }}>
+                          <span style={{
+                            padding: '4px 8px',
+                            borderRadius: 4,
+                            fontSize: 12,
+                            fontWeight: 500,
+                            background: machine.status === 'ON' || machine.status === 'active' ? '#dcfce7' : '#f3f4f6',
+                            color: machine.status === 'ON' || machine.status === 'active' ? '#166534' : '#6b7280'
+                          }}>
+                            {machine.status || 'unknown'}
+                          </span>
+                        </td>
+                        <td style={{ padding: '12px 8px', textAlign: 'center' }}>
+                          <button 
+                            onClick={() => startEdit(machine)}
+                            disabled={editingId !== null}
+                            style={{ 
+                              padding: '6px 12px', 
+                              borderRadius: 4, 
+                              border: '1px solid #3b82f6', 
+                              background: 'white', 
+                              color: '#3b82f6', 
+                              cursor: editingId !== null ? 'not-allowed' : 'pointer',
+                              fontSize: 12,
+                              fontWeight: 500,
+                              opacity: editingId !== null ? 0.5 : 1
+                            }}
+                          >
+                            ✏️ Edit
+                          </button>
+                        </td>
+                      </tr>
+                    )
                   ))}
                 </tbody>
               </table>
