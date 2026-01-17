@@ -6,6 +6,17 @@ const nextConfig = {
   env: {
     NEXT_PUBLIC_APP_URL: process.env.NEXT_PUBLIC_APP_URL || 'https://k-energysaveadmin.com',
   },
+  // Allow static HTML files in public folder
+  async rewrites() {
+    return {
+      beforeFiles: [
+        {
+          source: '/main.html',
+          destination: '/main.html',
+        },
+      ],
+    }
+  },
   // Performance optimizations
   swcMinify: true,
   compiler: {
