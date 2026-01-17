@@ -1,5 +1,5 @@
-import UserLogin from '../user/UserLogin'
+import { redirect } from 'next/navigation'
 
 export default function LoginPage() {
-  return <UserLogin />
+  redirect('/main-login')
 }

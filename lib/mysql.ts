@@ -4,9 +4,9 @@ import mysql from 'mysql2/promise'
 const pool = mysql.createPool({
   host: process.env.MYSQL_HOST || '127.0.0.1',
   port: parseInt(process.env.MYSQL_PORT || '3307'),
-  database: process.env.MYSQL_DATABASE || 'user',
-  user: process.env.MYSQL_USER || 'ksystem',
-  password: process.env.MYSQL_PASSWORD || 'Ksave2025Admin',
+  database: process.env.MYSQL_DATABASE || 'ksystem',
+  user: process.env.MYSQL_USER || 'root',
+  password: process.env.MYSQL_PASSWORD || 'Zera2025data',
   waitForConnections: true,
   connectionLimit: 5,
   queueLimit: 0,
@@ -22,7 +22,6 @@ pool.on('error', (err) => {
 
 // Note: Connection test removed for serverless compatibility
 // Connections are created on-demand when needed
-})()
 
 /**
  * Convert PostgreSQL parameterized query ($1, $2, etc.) to MySQL (?) syntax
