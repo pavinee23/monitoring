@@ -5,6 +5,15 @@ import React from 'react'
 export default function HomePage() {
 	return (
 		<>
+			{/* Announcement Bar */}
+			<div className="announcement-bar">
+				<div className="announcement-content">
+					<i className="bi bi-megaphone-fill"></i>
+					<span>🎉 New Update: K-SAVER Max now available for industrial applications!</span>
+					<a href="#products">Learn More →</a>
+				</div>
+			</div>
+
 			{/* Hero Section */}
 			<section className="hero">
 				<div className="container">
