@@ -38,34 +38,40 @@ export default function AdminLoginPage() {
         return
       }
 
-      // Check user's site from database
-      if (data.user) {
-        const userSite = (data.user.site || '').toLowerCase().trim()
+      // Check user's site from response data
+      const userSite = (data.site || '').toLowerCase().trim()
 
-        // Verify user's site is thailand or admin
-        if (userSite !== 'thailand' && userSite !== 'admin') {
-          setError('บัญชีนี้ไม่มีสิทธิ์เข้าถึงระบบ Thailand')
-          return
-        }
+      // Verify user's site is thailand or admin
+      if (userSite !== 'thailand' && userSite !== 'admin') {
+        setError('บัญชีนี้ไม่มีสิทธิ์เข้าถึงระบบ Thailand')
+        return
+      }
 
-        localStorage.setItem('k_system_admin_user', JSON.stringify(data.user))
-        localStorage.setItem('k_system_admin_token', data.token || '')
+      // Store user data and token
+      localStorage.setItem('k_system_admin_user', JSON.stringify({
+        userId: data.userId,
+        username: data.username,
+        name: data.name,
+        email: data.email,
+        site: data.site,
+        typeID: data.typeID
+      }))
+      localStorage.setItem('k_system_admin_token', data.token || '')
 
-        // Redirect based on typeID and site
-        // For Thailand/Admin site logins, send to the new Thailand dashboard
-        if (userSite === 'thailand' || userSite === 'admin') {
-          if (data.user.typeID === 1 || data.user.typeID === 2) {
-            router.push('/Thailand/Admin-Login/dashboard')
-          } else {
-            router.push('/sites')
-          }
+      // Redirect based on typeID and site
+      // For Thailand/Admin site logins, send to the new Thailand dashboard
+      if (userSite === 'thailand' || userSite === 'admin') {
+        if (data.typeID === 1 || data.typeID === 2) {
+          router.push('/Thailand/Admin-Login/dashboard')
         } else {
-          // Fallback: send super/admin users to the global admin main
-          if (data.user.typeID === 1 || data.user.typeID === 2) {
-            router.push('/admin/main')
-          } else {
-            router.push('/sites')
-          }
+          router.push('/sites')
+        }
+      } else {
+        // Fallback: send super/admin users to the global admin main
+        if (data.typeID === 1 || data.typeID === 2) {
+          router.push('/admin/main')
+        } else {
+          router.push('/sites')
         }
       }
     } catch (e: any) {
