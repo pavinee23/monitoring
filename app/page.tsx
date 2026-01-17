@@ -1,7 +1,624 @@
-import { redirect } from 'next/navigation'
+import Script from 'next/script'
+import Image from 'next/image'
 
-export default function Page() {
-  redirect('/main.html')
+export default function HomePage() {
+  return (
+    <>
+      <style jsx global>{`
+        * {
+          margin: 0;
+          padding: 0;
+          box-sizing: border-box;
+        }
+
+        body {
+          font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+          background: #f8f9fa;
+          color: #333;
+        }
+
+        .hero {
+          background: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%);
+          color: white;
+          min-height: 100vh;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          text-align: center;
+          padding: 40px 20px;
+          position: relative;
+          overflow: hidden;
+        }
+
+        .hero::before {
+          content: '';
+          position: absolute;
+          top: 0;
+          left: 0;
+          right: 0;
+          bottom: 0;
+          background: url('data:image/svg+xml,<svg width="100" height="100" xmlns="http://www.w3.org/2000/svg"><circle cx="50" cy="50" r="2" fill="rgba(255,255,255,0.1)"/></svg>');
+          opacity: 0.3;
+        }
+
+        .hero-content {
+          position: relative;
+          z-index: 1;
+          max-width: 900px;
+        }
+
+        .logo-hero {
+          width: 450px;
+          height: 220px;
+          margin: 0 auto 30px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          padding: 20px;
+          background: #ffffff;
+          border-radius: 25px;
+          box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15);
+          backdrop-filter: blur(10px);
+          border: 1px solid rgba(255, 255, 255, 0.3);
+          transition: all 0.3s ease;
+        }
+
+        .logo-hero:hover {
+          transform: translateY(-3px);
+          box-shadow: 0 12px 40px rgba(0, 0, 0, 0.2);
+        }
+
+        .logo-hero img {
+          width: 100%;
+          height: 100%;
+          object-fit: contain;
+        }
+
+        @keyframes pulse {
+          0%, 100% { transform: scale(1); }
+          50% { transform: scale(1.05); }
+        }
+
+        .emoji-hero {
+          width: 120px;
+          height: 120px;
+          margin: 0 auto 20px;
+          background: rgba(255, 255, 255, 0.1);
+          border-radius: 50%;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          font-size: 60px;
+          backdrop-filter: blur(10px);
+          border: 3px solid rgba(255, 255, 255, 0.2);
+          animation: pulse 2s infinite;
+        }
+
+        h1 {
+          font-size: 48px;
+          font-weight: 700;
+          margin-bottom: 20px;
+          text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2);
+        }
+
+        .hero h2 {
+          font-size: 36px;
+          font-weight: 600;
+          margin-bottom: 20px;
+          color: #fbbf24;
+        }
+
+        .tagline {
+          font-size: 20px;
+          margin-bottom: 40px;
+          opacity: 0.95;
+          line-height: 1.6;
+        }
+
+        .btn-custom-primary {
+          background: linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%);
+          color: #1e3a8a;
+          box-shadow: 0 6px 25px rgba(251, 191, 36, 0.5);
+          font-size: 20px;
+          font-weight: 700;
+          padding: 18px 45px;
+          border-radius: 50px;
+          text-decoration: none;
+          display: inline-flex;
+          align-items: center;
+          transition: all 0.3s ease;
+          border: none;
+          text-transform: uppercase;
+          letter-spacing: 0.5px;
+        }
+
+        .btn-custom-primary:hover {
+          transform: translateY(-4px) scale(1.02);
+          box-shadow: 0 10px 35px rgba(251, 191, 36, 0.7);
+          background: linear-gradient(135deg, #f59e0b 0%, #fbbf24 100%);
+        }
+
+        .btn-custom-secondary {
+          background: rgba(255, 255, 255, 0.15);
+          color: white;
+          border: 3px solid white;
+          backdrop-filter: blur(15px);
+          font-size: 20px;
+          font-weight: 700;
+          padding: 18px 45px;
+          border-radius: 50px;
+          text-decoration: none;
+          display: inline-flex;
+          align-items: center;
+          transition: all 0.3s ease;
+          text-transform: uppercase;
+          letter-spacing: 0.5px;
+        }
+
+        .btn-custom-secondary:hover {
+          background: white;
+          color: #1e3a8a;
+          transform: translateY(-4px) scale(1.02);
+          box-shadow: 0 10px 35px rgba(255, 255, 255, 0.4);
+        }
+
+        .section-title {
+          text-align: center;
+          font-size: 36px;
+          font-weight: 700;
+          margin-bottom: 60px;
+          color: #1e3a8a;
+        }
+
+        .feature-card {
+          background: #f8f9fa;
+          padding: 40px 30px;
+          border-radius: 20px;
+          text-align: center;
+          transition: all 0.3s ease;
+          border: 2px solid transparent;
+        }
+
+        .feature-card:hover {
+          transform: translateY(-10px);
+          box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+          border-color: #3b82f6;
+        }
+
+        .feature-icon {
+          width: 80px;
+          height: 80px;
+          margin: 0 auto 20px;
+          background: linear-gradient(135deg, #3b82f6 0%, #1e3a8a 100%);
+          border-radius: 20px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          font-size: 40px;
+        }
+
+        .feature-title {
+          font-size: 22px;
+          font-weight: 600;
+          margin-bottom: 15px;
+          color: #1e3a8a;
+        }
+
+        .feature-desc {
+          color: #666;
+          line-height: 1.6;
+        }
+
+        .product-card {
+          background: white;
+          border-radius: 20px;
+          overflow: hidden;
+          box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+          transition: all 0.3s ease;
+        }
+
+        .product-card:hover {
+          transform: translateY(-10px);
+          box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+        }
+
+        .product-header {
+          background: linear-gradient(135deg, #3b82f6 0%, #1e3a8a 100%);
+          color: white;
+          padding: 30px 20px;
+          text-align: center;
+        }
+
+        .product-name {
+          font-size: 24px;
+          font-weight: 700;
+          margin-bottom: 10px;
+        }
+
+        .product-body {
+          padding: 30px 20px;
+          text-align: center;
+        }
+
+        .contact {
+          padding: 80px 20px;
+          background: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%);
+          color: white;
+          text-align: center;
+        }
+
+        .contact-card {
+          background: rgba(255, 255, 255, 0.95);
+          padding: 40px 30px;
+          border-radius: 20px;
+          box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+          transition: all 0.3s ease;
+          height: 100%;
+        }
+
+        .contact-card:hover {
+          transform: translateY(-5px);
+          box-shadow: 0 15px 50px rgba(0, 0, 0, 0.3);
+        }
+
+        .contact-card h3 {
+          color: #1e3a8a;
+          font-size: 24px;
+          font-weight: 700;
+          margin-bottom: 25px;
+          padding-bottom: 15px;
+          border-bottom: 3px solid #fbbf24;
+        }
+
+        .contact-card p {
+          color: #334155;
+          line-height: 1.8;
+          font-size: 16px;
+        }
+
+        .contact-card .fw-bold {
+          color: #1e3a8a;
+          font-size: 20px;
+        }
+
+        .contact-card a {
+          color: #3b82f6;
+          text-decoration: none;
+          font-weight: 500;
+          transition: color 0.3s ease;
+        }
+
+        .contact-card a:hover {
+          color: #1e3a8a;
+          text-decoration: underline;
+        }
+
+        .contact-card i {
+          color: #3b82f6;
+        }
+
+        .announcement-bar {
+          background: linear-gradient(135deg, #1e3a8a 0%, #2563eb 100%);
+          color: white;
+          padding: 18px 0;
+          text-align: center;
+          font-weight: 800;
+          font-size: 24px;
+          font-family: 'Poppins', sans-serif;
+          position: relative;
+          overflow: hidden;
+          box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+          white-space: nowrap;
+          letter-spacing: 0.5px;
+        }
+
+        .announcement-bar::before {
+          content: '';
+          position: absolute;
+          top: 0;
+          left: -100%;
+          width: 100%;
+          height: 100%;
+          background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+          animation: shimmer 3s infinite;
+        }
+
+        @keyframes shimmer {
+          0% { left: -100%; }
+          100% { left: 100%; }
+        }
+
+        @keyframes scroll {
+          0% { transform: translateX(100%); }
+          100% { transform: translateX(-100%); }
+        }
+
+        .announcement-bar i {
+          margin-right: 10px;
+          animation: pulse 2s infinite;
+        }
+
+        .announcement-bar a {
+          color: white;
+          text-decoration: underline;
+          font-weight: 700;
+          margin-left: 10px;
+          transition: color 0.3s ease;
+        }
+
+        .announcement-bar a:hover {
+          color: #fbbf24;
+        }
+
+        .announcement-content {
+          position: relative;
+          z-index: 1;
+          display: inline-block;
+          animation: scroll 20s linear infinite;
+          padding-left: 100%;
+        }
+
+        .announcement-bar:hover .announcement-content {
+          animation-play-state: paused;
+        }
+
+        footer {
+          background: #1e293b;
+          color: #94a3b8;
+          padding: 40px 20px;
+          text-align: center;
+        }
+
+        footer a {
+          color: #fbbf24;
+          text-decoration: none;
+        }
+
+        .product-image {
+          width: 100%;
+          height: 350px;
+          object-fit: contain;
+          padding: 20px;
+          background: #f8f9fa;
+        }
+
+        @media (max-width: 768px) {
+          .logo-hero {
+            width: 280px;
+            height: 180px;
+          }
+
+          h1 {
+            font-size: 32px;
+          }
+
+          .hero h2 {
+            font-size: 24px;
+          }
+
+          .section-title {
+            font-size: 28px;
+          }
+        }
+      `}</style>
+
+      <link rel="preconnect" href="https://fonts.googleapis.com" />
+      <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
+      <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&family=Poppins:wght@400;600;700;800&display=swap" rel="stylesheet" />
+      <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet" />
+      <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" />
+
+      {/* Announcement Bar */}
+      <div className="announcement-bar">
+        <div className="announcement-content">
+          <i className="bi bi-megaphone-fill"></i>
+          <span>🎉 New Update: K-SAVER Max now available for industrial applications!</span>
+          <a href="#products">Learn More →</a>
+        </div>
+      </div>
+
+      {/* Hero Section */}
+      <section className="hero">
+        <div className="container">
+          <div className="row justify-content-center">
+            <div className="col-lg-10 text-center position-relative" style={{ zIndex: 1 }}>
+              <div className="logo-hero mx-auto">
+                <img src="/k-energy-save-logo.jpg" alt="K Energy Save" className="img-fluid" />
+              </div>
+              <div className="emoji-hero mx-auto">⚡</div>
+              <h1 className="hero-title">ENERGY YOU CAN TRUST</h1>
+              <h2 className="hero-subtitle">&quot;SAVINGS&quot; YOU CAN SEE</h2>
+              <p className="hero-tagline">Cut your Electric Bill from day one!<br />Advanced power-saving technology with proven results</p>
+              <div className="d-flex gap-3 justify-content-center flex-wrap">
+                <a href="https://strong-dory-enabled.ngrok-free.app" className="btn btn-custom-primary">
+                  <i className="bi bi-box-arrow-in-right me-2"></i>Login to Monitoring
+                </a>
+                <a href="#products" className="btn btn-custom-secondary">
+                  <i className="bi bi-grid-3x3-gap me-2"></i>View Products
+                </a>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Features Section */}
+      <section className="py-5 bg-light">
+        <div className="container py-5">
+          <div className="text-center mb-5">
+            <h2 className="section-title">Why Choose K Energy Save?</h2>
+          </div>
+          <div className="row g-4">
+            <div className="col-md-6 col-lg-4">
+              <div className="feature-card">
+                <div className="feature-icon">🔬</div>
+                <h3 className="feature-title">Proven Technology</h3>
+                <p className="feature-desc">Validated power saving device with global exports. Certified, eco-friendly, and patented solutions.</p>
+              </div>
+            </div>
+            <div className="col-md-6 col-lg-4">
+              <div className="feature-card">
+                <div className="feature-icon">🌿</div>
+                <h3 className="feature-title">Eco Friendly</h3>
+                <p className="feature-desc">Environmentally conscious solutions that reduce carbon footprint while saving energy.</p>
+              </div>
+            </div>
+            <div className="col-md-6 col-lg-4">
+              <div className="feature-card">
+                <div className="feature-icon">⚡</div>
+                <h3 className="feature-title">Power Quality</h3>
+                <p className="feature-desc">Improves power quality and system reliability, extending equipment lifespan.</p>
+              </div>
+            </div>
+            <div className="col-md-6 col-lg-4">
+              <div className="feature-card">
+                <div className="feature-icon">✅</div>
+                <h3 className="feature-title">Certified Reliability</h3>
+                <p className="feature-desc">Patented solutions trusted across industrial and commercial sectors worldwide.</p>
+              </div>
+            </div>
+            <div className="col-md-6 col-lg-4">
+              <div className="feature-card">
+                <div className="feature-icon">🌍</div>
+                <h3 className="feature-title">Global Impact</h3>
+                <p className="feature-desc">Exported power-saving devices benefiting multiple countries internationally.</p>
+              </div>
+            </div>
+            <div className="col-md-6 col-lg-4">
+              <div className="feature-card">
+                <div className="feature-icon">💰</div>
+                <h3 className="feature-title">7-15% Savings</h3>
+                <p className="feature-desc">Reduces power consumption by blocking excess power and improving efficiency.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Products Section */}
+      <section id="products" className="py-5">
+        <div className="container py-5">
+          <div className="text-center mb-5">
+            <h2 className="section-title">Our Products</h2>
+          </div>
+          <div className="row g-4">
+            <div className="col-md-6 col-lg-4">
+              <div className="product-card">
+                <div className="product-header">
+                  <h3 className="product-name">K-SAVER 10</h3>
+                  <p className="mb-0">For Small Business</p>
+                </div>
+                <img src="/k-saver-10.png" alt="K-SAVER 10" className="product-image" />
+                <div className="product-body">
+                  <p className="feature-desc mb-3">Perfect for retail stores, small offices, and small-scale businesses</p>
+                  <div className="d-flex align-items-center justify-content-center gap-2 text-muted">
+                    <i className="bi bi-lightning-charge-fill text-warning"></i>
+                    <small>Efficient & Reliable</small>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div className="col-md-6 col-lg-4">
+              <div className="product-card">
+                <div className="product-header">
+                  <h3 className="product-name">K-SAVER 30</h3>
+                  <p className="mb-0">For Medium Business</p>
+                </div>
+                <img src="/k-saver-30.png" alt="K-SAVER 30" className="product-image" />
+                <div className="product-body">
+                  <p className="feature-desc mb-3">Ideal for restaurants, hotels, and medium-sized businesses</p>
+                  <div className="d-flex align-items-center justify-content-center gap-2 text-muted">
+                    <i className="bi bi-lightning-charge-fill text-warning"></i>
+                    <small>Optimized Performance</small>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div className="col-md-6 col-lg-4">
+              <div className="product-card">
+                <div className="product-header">
+                  <h3 className="product-name">K-SAVER Max</h3>
+                  <p className="mb-0">For Industrial</p>
+                </div>
+                <img src="/k-saver-max.png" alt="K-SAVER Max" className="product-image" />
+                <div className="product-body">
+                  <p className="feature-desc mb-3">Suitable for factories, industrial plants, and large-scale enterprises</p>
+                  <div className="d-flex align-items-center justify-content-center gap-2 text-muted">
+                    <i className="bi bi-lightning-charge-fill text-warning"></i>
+                    <small>Maximum Capacity</small>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Contact Section */}
+      <section className="contact py-5">
+        <div className="container py-5">
+          <div className="text-center mb-5">
+            <h2 className="section-title text-white">Contact Us</h2>
+          </div>
+          <div className="row g-4">
+            {/* Thailand Office */}
+            <div className="col-lg-6">
+              <div className="contact-card">
+                <h3><i className="bi bi-geo-alt-fill me-2"></i>🇹🇭 Thailand Office</h3>
+                <div className="text-start">
+                  <p className="fw-bold mb-3">K Energy Save Co., Ltd.</p>
+                  <p className="mb-2"><i className="bi bi-building me-2"></i>84 Chaloem Phrakiat Rama 9 Soi 34</p>
+                  <p className="mb-3">Nong Bon, Prawet<br />Bangkok 10250, Thailand</p>
+                  <p className="mb-2">
+                    <i className="bi bi-telephone-fill me-2"></i>
+                    <a href="tel:+6620808916">+66 2 080 8916</a>
+                  </p>
+                  <p className="mb-0">
+                    <i className="bi bi-envelope-fill me-2"></i>
+                    <a href="mailto:info@kenergy-save.com">info@kenergy-save.com</a>
+                  </p>
+                </div>
+              </div>
+            </div>
+            
+            {/* Korea Office */}
+            <div className="col-lg-6">
+              <div className="contact-card">
+                <h3><i className="bi bi-geo-alt-fill me-2"></i>🇰🇷 Korea Office</h3>
+                <div className="text-start">
+                  <p className="fw-bold mb-3">Zera-Energy</p>
+                  <p className="mb-2"><i className="bi bi-building me-2"></i>2F, 16-10, 166beon-gil</p>
+                  <p className="mb-3">Elseso-ro, Gunpo-si<br />Gyeonggi-do, Korea</p>
+                  <p className="mb-2">
+                    <i className="bi bi-telephone-fill me-2"></i>
+                    <a href="tel:+82314271380">+82 31-427-1380</a>
+                  </p>
+                  <p className="mb-0">
+                    <i className="bi bi-envelope-fill me-2"></i>
+                    <a href="mailto:info@zera-energy.com">info@zera-energy.com</a>
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Footer */}
+      <footer className="py-4">
+        <div className="container">
+          <div className="row">
+            <div className="col-12 text-center">
+              <p className="mb-2">&copy; 2025 K Energy Save Co., Ltd. All rights reserved.</p>
+              <p className="mb-0">Powered by <a href="https://kenergy-save.com">K Energy Save</a></p>
+            </div>
+          </div>
+        </div>
+      </footer>
+
+      <Script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js" />
+    </>
+  )
 }
 
 
