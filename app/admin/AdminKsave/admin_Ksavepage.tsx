@@ -375,6 +375,7 @@ export default function AdminPage(): React.ReactElement {
           <td style={{ border: '1px solid #e5e7eb', padding: 8, textAlign: 'right' }}>{Number.isFinite(er) ? er.toFixed(3) : '-'}</td>
         </tr>
       )
+    })
 
     // totals row (sums for L1, L2, L3, kWh, P, Q, S, ER; averages for PF, THD, F)
     const cnt = totals.count || 1
