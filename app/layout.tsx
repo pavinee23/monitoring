@@ -1,14 +1,28 @@
 import React from "react"
 import './styles/globals.css'
+import Script from 'next/script'
+import { headers } from 'next/headers'
 
 export const metadata = {
 	title: "K Energy Save - ENERGY YOU CAN TRUST",
 	description: "Advanced power-saving technology with proven results. Cut your Electric Bill from day one!",
 }
 
-export default function RootLayout({ children }: { children: React.ReactNode }) {
+export default async function RootLayout({ children }: { children: React.ReactNode }) {
+	// Read Accept-Language on the server to render a matching `lang` attribute
+	const headersList = await headers()
+	const acceptLang = headersList.get('accept-language') || 'en'
+	const lang = acceptLang.split(',')[0].split('-')[0] || 'en'
+
 	return (
-		<html lang="en">
+		<html lang={lang}>
+			{/* Run before React hydration to remove classes that browser extensions (eg. Google Translate)
+				may inject and which would otherwise cause attribute mismatch warnings. */}
+			<Script
+				id="fix-translated-class"
+				strategy="beforeInteractive"
+				dangerouslySetInnerHTML={{ __html: "(function(){try{document.documentElement.classList.remove('translated-ltr');}catch(e){} })()" }}
+			/>
 			<body suppressHydrationWarning>
 				{children}
 			</body>
