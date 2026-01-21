@@ -35,7 +35,7 @@ Type: 0 (User)
 ```
 **เข้าได้:**
 - ✅ `/main-login` → `/sites`
-- ❌ Admin dashboard (ไม่มีสิทธิ์)
+- ✅ `/Thailand/Admin-Login` → `/Thailand/Admin-Login/dashboard` ✨ (สิทธิ์พิเศษ - เข้าได้ทุกหน้า!)
 
 ---
 
@@ -49,9 +49,9 @@ Type: 0 (User)
 ```
 **เข้าได้:**
 - ✅ `/main-login` → `/sites`
-- ❌ Admin dashboard (ถึงชื่อ admin แต่ typeID = 0)
+- ✅ `/Thailand/Admin-Login` → `/Thailand/Admin-Login/dashboard` ✨ (สิทธิ์พิเศษ - เข้าได้ทุกหน้า!)
 
-**⚠️ หมายเหตุ:** แม้ username จะเป็น "admin" แต่เป็น User ทั่วไป ไม่ใช่ Admin
+**⚠️ หมายเหตุ:** แม้ username จะเป็น "admin" และ typeID = 0 แต่ได้รับสิทธิ์พิเศษให้เข้าได้ทุกหน้า
 
 ---
 
@@ -79,7 +79,7 @@ Type: 0 (User)
 ```
 **เข้าได้:**
 - ✅ `/main-login` → `/sites`
-- ✅ `/Thailand/Admin-Login` → `/Thailand/Admin-Login/dashboard` ✨ (อัพเดทใหม่!)
+- ⚠️ `/Thailand/Admin-Login` → `/sites` (ไม่มีสิทธิ์ dashboard)
 
 ---
 
@@ -137,12 +137,15 @@ Type: 1 (Super Admin)
 **ใช้ได้:**
 - ✅ thailand_admin / Thailand2026 / Thailand → Dashboard
 - ✅ superadmin / Admin2026 / Admin → Dashboard
-- ✅ user / 11223344 / thailand → Dashboard ✨ (อัพเดทใหม่!)
-- ✅ testuser / 4444 / thailand → Dashboard ✨ (อัพเดทใหม่!)
+- ✅ pavinee / 018644 / republic korea → Dashboard ✨ (สิทธิ์พิเศษ!)
+- ✅ admin / 15388 / republic korea → Dashboard ✨ (สิทธิ์พิเศษ!)
+- ✅ user / 11223344 / thailand → Dashboard ✨
+- ⚠️ testuser / 4444 / thailand → Sites (ไม่มีสิทธิ์ dashboard)
 
 **ข้อกำหนด:**
-- Site ต้องเป็น "Thailand" หรือ "Admin"
-- typeID ต้องเป็น 1, 2 หรือ 0 (สำหรับ site thailand เท่านั้น)
+- Admin users (typeID 1,2): เข้าได้ทุกคน
+- Republic Korea users: เฉพาะ pavinee และ admin
+- Thailand users: เฉพาะ user เท่านั้น
 
 ---
 
@@ -158,10 +161,10 @@ Type: 1 (Super Admin)
 
 | Username | Password | Site | Type | Main Login | Thailand Admin | Admin System |
 |----------|----------|------|------|------------|----------------|--------------|
-| pavinee | 018644 | republic korea | 0 | ✅ Sites | ❌ | ❌ |
-| admin | 15388 | republic korea | 0 | ✅ Sites | ❌ | ❌ |
+| pavinee | 018644 | republic korea | 0 | ✅ Sites | ✅ Dashboard ✨ | ❌ |
+| admin | 15388 | republic korea | 0 | ✅ Sites | ✅ Dashboard ✨ | ❌ |
 | user | 11223344 | thailand | 0 | ✅ Sites | ✅ Dashboard ✨ | ❌ |
-| testuser | 4444 | thailand | 0 | ✅ Sites | ✅ Dashboard ✨ | ❌ |
+| testuser | 4444 | thailand | 0 | ✅ Sites | ⚠️ Sites | ❌ |
 | thailand_admin | Thailand2026 | thailand | 2 | ✅ Sites | ✅ Dashboard | ✅ Admin |
 | superadmin | Admin2026 | admin | 1 | ✅ Sites | ✅ Dashboard | ✅ Admin |
 
