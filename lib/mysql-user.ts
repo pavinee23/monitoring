@@ -51,6 +51,8 @@ export async function queryUser(sql: string, values?: any[]): Promise<any[]> {
 
 /**
  * Authenticate user login
+ * Uses HTTP API proxy when NEXT_PUBLIC_API_URL is set (for Vercel)
+ * Uses direct MySQL connection when running locally
  * @param username Username
  * @param password Password (plain text - will be compared with hashed)
  * @param site Site/Branch
@@ -68,6 +70,53 @@ export async function authenticateUser(
   site: string
   typeID: number
 } | null> {
+  // Check if we should use HTTP API proxy (for Vercel deployment)
+  const apiUrl = process.env.NEXT_PUBLIC_API_URL
+  const useProxy = process.env.USE_MYSQL_PROXY === 'true' || (apiUrl && apiUrl.includes('ngrok'))
+
+  if (useProxy && apiUrl) {
+    console.log('🌐 Using HTTP API proxy for authentication:', apiUrl)
+    try {
+      const response = await fetch(`${apiUrl}/api/user-login.php`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'User-Agent': 'K-System-Vercel/1.0',
+        },
+        body: JSON.stringify({ username, password, site }),
+        // @ts-ignore - Node.js fetch options
+        timeout: 10000
+      })
+
+      if (!response.ok) {
+        const errorText = await response.text().catch(() => 'Unknown error')
+        console.log('❌ API authentication failed:', response.status, errorText)
+        return null
+      }
+
+      const data = await response.json()
+
+      if (data.success && data.userId) {
+        return {
+          userId: data.userId,
+          userName: data.username,
+          name: data.name || '',
+          email: data.email || '',
+          site: data.site || '',
+          typeID: data.typeID
+        }
+      }
+
+      return null
+    } catch (error: any) {
+      console.error('❌ HTTP API authentication error:', error.message)
+      // Fall back to direct MySQL connection if proxy fails
+      console.log('⚠️ Falling back to direct MySQL connection')
+    }
+  }
+
+  // Use direct MySQL connection (local development)
+  console.log('🔌 Using direct MySQL connection for authentication')
   const sql = `
     SELECT userId, userName, name, email, site, password, typeID
     FROM user_list
