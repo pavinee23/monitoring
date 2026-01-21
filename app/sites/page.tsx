@@ -17,6 +17,10 @@ type Machine = {
   phone?: string
 }
 function MachineCard({ m, services, selectedSiteFilter }: { m: Machine; services?: any; selectedSiteFilter?: string }) {
+    // Stub for saveDeviceMetrics to prevent TS error
+    function saveDeviceMetrics() {
+      // TODO: implement saving device metrics if needed
+    }
   const [isMounted, setIsMounted] = useState(false)
   const [now, setNow] = useState<Date | null>(null)
   const [devicePower, setDevicePower] = useState<string | null>(null)
@@ -188,9 +192,9 @@ function MachineCard({ m, services, selectedSiteFilter }: { m: Machine; services
           onClick={() => {
             const deviceId = (m.ksave || m.id || '').toUpperCase()
 
-            // KSave01 uses Node-RED Dashboard
+            // KSave01 uses Node-RED Dashboard (updated URL)
             if (deviceId === 'KSAVE01') {
-              window.open('https://unconsumptive-nonexcitably-bobbye.ngrok-free.dev/ui', '_blank')
+              window.open('https://ksave01-nodered.ngrok.app/ui', '_blank')
             } else {
               // Other devices use new monitoring page
               router.push(`/device-monitoring?device=${encodeURIComponent(m.ksave || m.id || '')}`)

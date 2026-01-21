@@ -8,15 +8,15 @@ export async function POST(req: Request) {
   try {
     const body = await req.json().catch(() => ({}))
     // simple validation
-    const { name, ksave, location, phone, email, password } = body || {}
+    const { name, ksave, location, phone, email, password, beforeMeterNo, metricsMeterNo } = body || {}
     if (!name || !ksave) return NextResponse.json({ error: 'name and ksave are required' }, { status: 400 })
 
     // Save to MySQL database FIRST (primary data store)
     let savedDevice = null
     try {
       const result: any = await query(`
-        INSERT INTO devices (deviceName, ksaveID, location, phone, status, U_email, P_email, pass_phone)
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+        INSERT INTO devices (deviceName, ksaveID, location, phone, status, U_email, P_email, pass_phone, beforeMeterNo, metricsMeterNo)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
       `, [
         name, 
         ksave, 
@@ -25,7 +25,9 @@ export async function POST(req: Request) {
         'OK',
         email || '', // U_email
         email || '', // P_email (same as U_email)
-        password || ''  // pass_phone
+        password || '',  // pass_phone
+        beforeMeterNo || '',
+        metricsMeterNo || ''
       ])
 
       // Fetch the inserted device
@@ -115,7 +117,7 @@ export async function GET(req: Request) {
     const offset = parseInt(url.searchParams.get('offset') || '0')
 
     const devices = await query(`
-      SELECT deviceID, deviceName, ksaveID, ipAddress, location, phone, U_email, P_email, pass_phone, status, created_at, updated_at
+      SELECT deviceID, deviceName, ksaveID, ipAddress, location, phone, U_email, P_email, pass_phone, beforeMeterNo, metricsMeterNo, status, created_at, updated_at
       FROM devices
       ORDER BY created_at DESC
       LIMIT ? OFFSET ?

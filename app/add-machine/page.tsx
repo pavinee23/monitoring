@@ -10,6 +10,9 @@ export default function AddMachinePage() {
   const [phone, setPhone] = useState('')
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
+  const [ipAddress, setIpAddress] = useState('')
+  const [beforeMeterNo, setBeforeMeterNo] = useState('')
+  const [metricsMeterNo, setMetricsMeterNo] = useState('')
   const [saving, setSaving] = useState(false)
   const [result, setResult] = useState<any | null>(null)
   const [error, setError] = useState<string | null>(null)
@@ -25,6 +28,9 @@ export default function AddMachinePage() {
   const [editPhone, setEditPhone] = useState('')
   const [editEmail, setEditEmail] = useState('')
   const [editPassword, setEditPassword] = useState('')
+  const [editIpAddress, setEditIpAddress] = useState('')
+  const [editBeforeMeterNo, setEditBeforeMeterNo] = useState('')
+  const [editMetricsMeterNo, setEditMetricsMeterNo] = useState('')
   const [editStatus, setEditStatus] = useState('')
   const [updating, setUpdating] = useState(false)
 
@@ -34,11 +40,16 @@ export default function AddMachinePage() {
     try {
       const res = await fetch('/api/admin_route/machines')
       const data = await res.json()
+      console.log('📊 Fetch machines response:', data)
+      console.log('📊 Machines count:', data.machines?.length || 0)
       if (data.ok && data.machines) {
         setMachines(data.machines)
+        console.log('✅ Machines set to state:', data.machines.length)
+      } else {
+        console.warn('⚠️ API response not ok or no machines:', data)
       }
     } catch (err) {
-      console.error('Failed to fetch machines:', err)
+      console.error('❌ Failed to fetch machines:', err)
     } finally {
       setLoadingMachines(false)
     }
@@ -67,7 +78,7 @@ export default function AddMachinePage() {
       const res = await fetch('/api/admin_route/machines', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ name, ksave, location, phone, email, password })
+        body: JSON.stringify({ name, ksave, location, phone, email, password, ipAddress, beforeMeterNo, metricsMeterNo })
       })
 
       // read response text for better error messages
@@ -102,6 +113,9 @@ export default function AddMachinePage() {
       setPhone('')
       setEmail('')
       setPassword('')
+      setIpAddress('')
+      setBeforeMeterNo('')
+      setMetricsMeterNo('')
       return body
     } catch (err: any) {
       const msg = err?.message || String(err)
@@ -131,6 +145,9 @@ export default function AddMachinePage() {
     setEditPhone(machine.phone || '')
     setEditEmail(machine.U_email || '')
     setEditPassword(machine.pass_phone || '')
+    setEditIpAddress(machine.ipAddress || '')
+    setEditBeforeMeterNo(machine.beforeMeterNo || '')
+    setEditMetricsMeterNo(machine.metricsMeterNo || '')
     setEditStatus(machine.status || 'OK')
   }
 
@@ -142,6 +159,9 @@ export default function AddMachinePage() {
     setEditPhone('')
     setEditEmail('')
     setEditPassword('')
+    setEditIpAddress('')
+    setEditBeforeMeterNo('')
+    setEditMetricsMeterNo('')
     setEditStatus('')
   }
 
@@ -162,6 +182,9 @@ export default function AddMachinePage() {
           phone: editPhone,
           email: editEmail,
           password: editPassword,
+          ipAddress: editIpAddress,
+          beforeMeterNo: editBeforeMeterNo,
+          metricsMeterNo: editMetricsMeterNo,
           status: editStatus
         })
       })
@@ -193,7 +216,7 @@ export default function AddMachinePage() {
           <h1 style={{ margin: 0, fontSize: 28, fontWeight: 700 }}>Add Machine</h1>
           <p style={{ margin: '8px 0 0 0', color: '#6b7280' }}>Register new device </p>
         </div>
-        <Link href="/sites" className="k-btn k-btn-ghost">← Back to Sites</Link>
+        <Link href="/admin/AdminKsave" className="k-btn k-btn-ghost">← Back to Admin System</Link>
       </header>
 
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 24 }}>
@@ -204,38 +227,52 @@ export default function AddMachinePage() {
             {success && <div style={{ marginBottom: 12, padding: 10, background: '#ecfccb', border: '1px solid #86efac', color: '#065f46', borderRadius: 6 }}>{success}</div>}
 
         <div style={{ marginBottom: 8 }}>
-          <label style={{ display: 'block', fontSize: 13 }}>KSave Name Service</label>
-          <input className="k-input" value={name} onChange={(e) => setName(e.target.value)} />
+          <label style={{ display: 'block', fontSize: 13 }}>KSave Name .</label>
+          <input className="k-input" value={name} onChange={(e) => setName(e.target.value)} placeholder="KSAVE01"/>
         </div>
 
         <div style={{ marginBottom: 8 }}>
-          <label style={{ display: 'block', fontSize: 13 }}>KSave ID</label>
-          <input className="k-input" value={ksave} onChange={(e) => setKsave(e.target.value)} />
+          <label style={{ display: 'block', fontSize: 13 }}>KSave ID.</label>
+          <input className="k-input" value={ksave} onChange={(e) => setKsave(e.target.value)} placeholder="KSAVE01" />
         </div>
 
         <div style={{ marginBottom: 8 }}>
           <label style={{ display: 'block', fontSize: 13 }}>Location / Site</label>
-          <input className="k-input" value={location} onChange={(e) => setLocation(e.target.value)} />
+          <input className="k-input" value={location} onChange={(e) => setLocation(e.target.value)} placeholder="Location or site name" />
         </div>
 
         <div style={{ marginBottom: 8 }}>
           <label style={{ display: 'block', fontSize: 13 }}>Phone</label>
-          <input className="k-input" type="tel" value={phone} onChange={(e) => setPhone(e.target.value)} placeholder="Optional" />
+          <input className="k-input" type="tel" value={phone} onChange={(e) => setPhone(e.target.value)} placeholder="Phone number device" />
         </div>
 
         <div style={{ marginBottom: 8 }}>
           <label style={{ display: 'block', fontSize: 13 }}>Email</label>
-          <input className="k-input" type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="Optional" />
+          <input className="k-input" type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="email device" />
         </div>
 
         <div style={{ marginBottom: 8 }}>
           <label style={{ display: 'block', fontSize: 13 }}>Password</label>
-          <input className="k-input" type="password" value={password} onChange={(e) => setPassword(e.target.value)} placeholder="Optional" />
+          <input className="k-input" type="password" value={password} onChange={(e) => setPassword(e.target.value)} placeholder="password email" />
         </div>
 
+        <div style={{ marginBottom: 8 }}>
+          <label style={{ display: 'block', fontSize: 13 }}>IP Address</label>
+          <input className="k-input" value={ipAddress} onChange={(e) => setIpAddress(e.target.value)} placeholder="Optional (e.g., 192.168.1.100)" />
+        </div>
+
+        <div style={{ marginBottom: 8 }}>
+          <label style={{ display: 'block', fontSize: 13 }}>Before Meter No.</label>
+          <input className="k-input" value={beforeMeterNo} onChange={(e) => setBeforeMeterNo(e.target.value)} placeholder="Optional" />
+        </div>
+
+        <div style={{ marginBottom: 8 }}>
+          <label style={{ display: 'block', fontSize: 13 }}>Metrics Meter No.</label>
+          <input className="k-input" value={metricsMeterNo} onChange={(e) => setMetricsMeterNo(e.target.value)} placeholder="Optional" />
+        </div>
         <div style={{ display: 'flex', gap: 8, marginTop: 12 }}>
           <button className="k-btn k-btn-primary" type="submit" disabled={saving || !name.trim() || !ksave.trim()}>{saving ? 'Saving...' : 'Create'}</button>
-          <button className="k-btn k-btn-ghost" type="button" onClick={() => { setName(''); setKsave(''); setLocation(''); setPhone(''); setEmail(''); setPassword(''); setResult(null); setError(null) }}>Reset</button>
+          <button className="k-btn k-btn-ghost" type="button" onClick={() => { setName(''); setKsave(''); setLocation(''); setPhone(''); setEmail(''); setPassword(''); setIpAddress(''); setBeforeMeterNo(''); setMetricsMeterNo(''); setResult(null); setError(null) }}>Reset</button>
         </div>
 
         {error && (
@@ -284,6 +321,9 @@ export default function AddMachinePage() {
                     <th style={{ padding: '12px 8px', textAlign: 'left', fontWeight: 600, color: '#374151' }}>Phone</th>
                     <th style={{ padding: '12px 8px', textAlign: 'left', fontWeight: 600, color: '#374151' }}>Email</th>
                     <th style={{ padding: '12px 8px', textAlign: 'left', fontWeight: 600, color: '#374151' }}>Password</th>
+                    <th style={{ padding: '12px 8px', textAlign: 'left', fontWeight: 600, color: '#374151' }}>IP Address</th>
+                    <th style={{ padding: '12px 8px', textAlign: 'left', fontWeight: 600, color: '#374151' }}>Before Meter</th>
+                    <th style={{ padding: '12px 8px', textAlign: 'left', fontWeight: 600, color: '#374151' }}>Metrics Meter</th>
                     <th style={{ padding: '12px 8px', textAlign: 'center', fontWeight: 600, color: '#374151' }}>Status</th>
                     <th style={{ padding: '12px 8px', textAlign: 'center', fontWeight: 600, color: '#374151' }}>Actions</th>
                   </tr>
@@ -341,6 +381,33 @@ export default function AddMachinePage() {
                             onChange={(e) => setEditPassword(e.target.value)}
                             style={{ width: '100%', padding: '6px', border: '1px solid #d1d5db', borderRadius: 4, fontSize: 13 }}
                             placeholder="Password"
+                          />
+                        </td>
+                        <td style={{ padding: '8px' }}>
+                          <input 
+                            type="text" 
+                            value={editIpAddress} 
+                            onChange={(e) => setEditIpAddress(e.target.value)}
+                            style={{ width: '100%', padding: '6px', border: '1px solid #d1d5db', borderRadius: 4, fontSize: 13 }}
+                            placeholder="IP Address"
+                          />
+                        </td>
+                        <td style={{ padding: '8px' }}>
+                          <input 
+                            type="text" 
+                            value={editBeforeMeterNo} 
+                            onChange={(e) => setEditBeforeMeterNo(e.target.value)}
+                            style={{ width: '100%', padding: '6px', border: '1px solid #d1d5db', borderRadius: 4, fontSize: 13 }}
+                            placeholder="Before Meter"
+                          />
+                        </td>
+                        <td style={{ padding: '8px' }}>
+                          <input 
+                            type="text" 
+                            value={editMetricsMeterNo} 
+                            onChange={(e) => setEditMetricsMeterNo(e.target.value)}
+                            style={{ width: '100%', padding: '6px', border: '1px solid #d1d5db', borderRadius: 4, fontSize: 13 }}
+                            placeholder="Metrics Meter"
                           />
                         </td>
                         <td style={{ padding: '8px' }}>
@@ -418,6 +485,15 @@ export default function AddMachinePage() {
                         </td>
                         <td style={{ padding: '12px 8px', color: '#6b7280', fontFamily: 'monospace' }}>
                           {machine.pass_phone ? '••••••••' : '—'}
+                        </td>
+                        <td style={{ padding: '12px 8px', color: '#6b7280', fontFamily: 'monospace' }}>
+                          {machine.ipAddress || '—'}
+                        </td>
+                        <td style={{ padding: '12px 8px', color: '#6b7280' }}>
+                          {machine.beforeMeterNo || '—'}
+                        </td>
+                        <td style={{ padding: '12px 8px', color: '#6b7280' }}>
+                          {machine.metricsMeterNo || '—'}
                         </td>
                         <td style={{ padding: '12px 8px', textAlign: 'center' }}>
                           <span style={{

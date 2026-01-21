@@ -57,7 +57,7 @@ export async function POST(req: NextRequest) {
   } catch (err: any) {
     console.error('❌ User login error:', err.message || err)
     return NextResponse.json({
-      error: 'เกิดข้อผิดพลาดระหว่างการเข้าสู่ระบบ กรุณาลองใหม่อีกครั้ง'
+      error: 'An error occurred during login. Please try again.'
     }, { status: 500 })
   }
 }
