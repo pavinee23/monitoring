@@ -90,7 +90,7 @@ vercel --prod
 ngrok http 3001
 ```
 
-คัดลอก URL ที่ได้ (เช่น `https://abc123.ngrok-free.app`)
+คัดลอก URL ที่ได้ (เช่น `https://ksave-monitoring.com`)
 
 ### 5.3 อัพเดท Vercel Environment Variables
 
@@ -213,3 +213,4 @@ npm run build
 3. ⏳ ตั้งค่า ngrok static domain (paid plan)
 4. ⏳ เปิด Analytics ใน Vercel
 
+# Deployment Wed Jan 21 21:44:15 KST 2026
