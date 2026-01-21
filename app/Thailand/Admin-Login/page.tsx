@@ -42,10 +42,14 @@ export default function AdminLoginPage() {
 
       // Check user's site from response data
       const userSite = (data.site || '').toLowerCase().trim()
-      console.log('🔍 User site:', userSite, 'typeID:', data.typeID)
+      const userTypeID = parseInt(data.typeID) // Convert to number
+
+      console.log('🔍 Full response data:', JSON.stringify(data))
+      console.log('🔍 User site:', userSite, 'typeID:', userTypeID, 'typeID type:', typeof userTypeID)
 
       // Verify user's site is thailand or admin
       if (userSite !== 'thailand' && userSite !== 'admin') {
+        console.log('❌ Site check failed:', userSite)
         setError('บัญชีนี้ไม่มีสิทธิ์เข้าถึงระบบ Thailand')
         return
       }
@@ -57,31 +61,32 @@ export default function AdminLoginPage() {
         name: data.name,
         email: data.email,
         site: data.site,
-        typeID: data.typeID
+        typeID: userTypeID
       }))
       localStorage.setItem('k_system_admin_token', data.token || '')
 
-      console.log('🔍 About to redirect - site:', userSite, 'typeID:', data.typeID)
+      console.log('🔍 About to redirect - site:', userSite, 'typeID:', userTypeID)
 
-      // Redirect based on typeID and site
-      // For Thailand/Admin site logins, allow access to Thailand users
+      // Redirect based on typeID and site - allow Thailand users (typeID 0)
       if (userSite === 'thailand' || userSite === 'admin') {
-        if (data.typeID === 1 || data.typeID === 2) {
+        console.log('✅ Site verified as thailand/admin')
+        if (userTypeID === 1 || userTypeID === 2) {
           console.log('✅ Redirecting to Thailand dashboard (Admin)')
           router.push('/Thailand/Admin-Login/dashboard')
           return
-        } else if (data.typeID === 0 && userSite === 'thailand') {
-          console.log('✅ Allowing Thailand user access to dashboard')
+        } else if (userTypeID === 0 && userSite === 'thailand') {
+          console.log('✅ Allowing Thailand user (typeID 0) access to dashboard')
           router.push('/Thailand/Admin-Login/dashboard')
           return
         } else {
-          console.log('⚠️ Not authorized - typeID:', data.typeID)
+          console.log('⚠️ Not authorized - typeID:', userTypeID, 'site:', userSite)
           router.push('/sites')
           return
         }
       } else {
+        console.log('⚠️ Site not thailand/admin, using fallback')
         // Fallback: send super/admin users to the Thailand dashboard
-        if (data.typeID === 1 || data.typeID === 2) {
+        if (userTypeID === 1 || userTypeID === 2) {
           router.push('/Thailand/Admin-Login/dashboard')
         } else {
           router.push('/sites')
