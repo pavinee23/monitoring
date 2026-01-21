@@ -17,13 +17,15 @@ export default async function RootLayout({ children }: { children: React.ReactNo
 
 	return (
 		<html lang={lang}>
-			{/* Run before React hydration to remove classes that browser extensions (eg. Google Translate)
-				may inject and which would otherwise cause attribute mismatch warnings. */}
-			<Script
-				id="fix-translated-class"
-				strategy="beforeInteractive"
-				dangerouslySetInnerHTML={{ __html: "(function(){try{document.documentElement.classList.remove('translated-ltr');}catch(e){} })()" }}
-			/>
+			<head>
+				{/* Run before React hydration to remove classes that browser extensions (eg. Google Translate)
+					may inject and which would otherwise cause attribute mismatch warnings. */}
+				<Script
+					id="fix-translated-class"
+					strategy="beforeInteractive"
+					dangerouslySetInnerHTML={{ __html: "(function(){try{document.documentElement.classList.remove('translated-ltr');}catch(e){} })()" }}
+				/>
+			</head>
 			<body suppressHydrationWarning>
 				{children}
 			</body>
