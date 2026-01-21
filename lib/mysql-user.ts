@@ -70,27 +70,24 @@ export async function authenticateUser(
   site: string
   typeID: number
 } | null> {
-  // Check if we should use HTTP API proxy (for Vercel deployment)
-  const apiUrl = process.env.NEXT_PUBLIC_API_URL
-  const useProxy = process.env.USE_MYSQL_PROXY === 'true' || (apiUrl && apiUrl.includes('ngrok'))
+  // Check if we should use internal MySQL proxy API (for Vercel deployment)
+  const useProxy = process.env.USE_MYSQL_PROXY === 'true'
 
-  if (useProxy && apiUrl) {
-    console.log('🌐 Using HTTP API proxy for authentication:', apiUrl)
+  if (useProxy) {
+    console.log('🌐 Using internal MySQL proxy API for authentication')
     try {
-      const response = await fetch(`${apiUrl}/api/user-login.php`, {
+      // Use internal Next.js API route
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || ''}/api/auth/mysql-proxy`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'User-Agent': 'K-System-Vercel/1.0',
         },
-        body: JSON.stringify({ username, password, site }),
-        // @ts-ignore - Node.js fetch options
-        timeout: 10000
+        body: JSON.stringify({ username, password, site })
       })
 
       if (!response.ok) {
-        const errorText = await response.text().catch(() => 'Unknown error')
-        console.log('❌ API authentication failed:', response.status, errorText)
+        const errorData = await response.json().catch(() => ({ error: 'Unknown error' }))
+        console.log('❌ Proxy API authentication failed:', response.status, errorData.error)
         return null
       }
 
@@ -109,7 +106,7 @@ export async function authenticateUser(
 
       return null
     } catch (error: any) {
-      console.error('❌ HTTP API authentication error:', error.message)
+      console.error('❌ Proxy API authentication error:', error.message)
       // Fall back to direct MySQL connection if proxy fails
       console.log('⚠️ Falling back to direct MySQL connection')
     }
