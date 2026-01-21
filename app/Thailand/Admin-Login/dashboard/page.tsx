@@ -53,10 +53,13 @@ export default function ThailandAdminDashboard() {
           return
         }
 
+        // Allow admin (typeID 1,2) or Thailand users (typeID 0 with site thailand)
         if (u.typeID !== 1 && u.typeID !== 2) {
-          // Not admin/super-admin
-          router.push('/Thailand/Admin-Login')
-          return
+          if (!(u.typeID === 0 && siteLower === 'thailand')) {
+            // Not authorized
+            router.push('/Thailand/Admin-Login')
+            return
+          }
         }
 
         setUser(u)
