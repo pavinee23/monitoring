@@ -30,7 +30,7 @@ export default function HomePage() {
 								Advanced power-saving technology with proven results
 							</p>
 							<div className="d-flex gap-3 justify-content-center flex-wrap">
-								<a href="/main-login" className="btn-custom-primary">
+								<a href="https://strong-dory-enabled.ngrok-free.app/main-login" className="btn-custom-primary">
 									🚀 Login to monitoring
 								</a>
 								<a href="#products" className="btn-custom-secondary">
