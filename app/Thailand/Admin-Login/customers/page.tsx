@@ -40,7 +40,7 @@ export default function Page(){
   return (
     <div style={styles.container}>
       <div style={{display:'flex',justifyContent:'space-between',alignItems:'center'}}>
-        <h2>ลูกค้า / Customers</h2>
+        <h2>รายละเอียดลูกค้า</h2>
         <button onClick={()=>router.back()} style={{padding:8}}>ย้อนกลับ / Back</button>
       </div>
 
