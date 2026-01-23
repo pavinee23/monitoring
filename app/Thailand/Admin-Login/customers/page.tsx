@@ -3,6 +3,7 @@
 import React, { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import styles from '../admin-theme.module.css'
+import poStyles from '../purchase-order.module.css'
 
 type Customer = {
   cusID: number,
@@ -53,12 +54,12 @@ export default function Page(){
     return () => { mounted = false }
   }, [])
 
-  const styles={container:{padding:24,fontFamily:'Inter,system-ui,Arial',maxWidth:1200,margin:'auto'},table:{width:'100%',borderCollapse:'collapse'}} as const
+  const inlineStyles={container:{padding:24,fontFamily:'Inter,system-ui,Arial',maxWidth:1200,margin:'auto'},table:{width:'100%',borderCollapse:'collapse'}} as const
 
   return (
     <div style={styles.container}>
       <div style={{display:'flex',justifyContent:'space-between',alignItems:'center'}}>
-        <h2>{locale === 'th' ? 'รายละเอียดลูกค้า' : 'Customer Details'}</h2>
+        <h2 className={styles.pageTitle}>{locale === 'th' ? 'รายละเอียดลูกค้า' : 'Customer Details'}</h2>
         <div style={{display:'flex',gap:8,alignItems:'center'}}>
           <button onClick={toggleLocale} style={{padding:'6px 10px',borderRadius:6}}>{locale === 'th' ? 'TH' : 'EN'}</button>
           <button className={styles.btnBack} onClick={()=>router.back()}>{locale === 'th' ? 'ย้อนกลับ' : 'Back'}</button>
@@ -67,7 +68,8 @@ export default function Page(){
 
       <div style={{marginTop:12}}>
         {customers.length===0? <div style={{color:'#6b7280'}}>ยังไม่มีลูกค้า / No customers yet</div> : (
-          <table style={styles.table}>
+          <div className={poStyles.tableWrapper}>
+            <table className={poStyles.poTable}>
             <thead>
               <tr style={{textAlign:'left'}}>
                 <th>{locale === 'th' ? 'รหัส' : 'cusID'}</th>
@@ -82,23 +84,24 @@ export default function Page(){
                 <th>{locale === 'th' ? 'วันที่สร้าง' : 'created_at'}</th>
               </tr>
             </thead>
-            <tbody>
-              {customers.map(c=> (
-                <tr key={c.cusID} style={{borderTop:'1px solid #e6edf3'}}>
-                  <td style={{padding:8}}>{c.cusID}</td>
-                  <td style={{padding:8}}>{c.fullname}</td>
-                  <td style={{padding:8}}>{c.email}</td>
-                  <td style={{padding:8}}>{c.phone}</td>
-                  <td style={{padding:8}}>{c.company}</td>
-                  <td style={{padding:8}}>{c.address}</td>
-                  <td style={{padding:8}}>{c.subject}</td>
-                  <td style={{padding:8,whiteSpace:'pre-wrap'}}>{c.message}</td>
-                  <td style={{padding:8}}>{c.created_by}</td>
-                  <td style={{padding:8}}>{c.created_at}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
+              <tbody>
+                {customers.map(c=> (
+                  <tr key={c.cusID}>
+                    <td>{c.cusID}</td>
+                    <td>{c.fullname}</td>
+                    <td>{c.email}</td>
+                    <td>{c.phone}</td>
+                    <td>{c.company}</td>
+                    <td>{c.address}</td>
+                    <td>{c.subject}</td>
+                    <td style={{whiteSpace:'pre-wrap'}}>{c.message}</td>
+                    <td>{c.created_by}</td>
+                    <td>{c.created_at}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
         )}
       </div>
     </div>
