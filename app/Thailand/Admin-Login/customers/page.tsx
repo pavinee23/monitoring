@@ -2,6 +2,7 @@
 
 import React, { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
+import styles from '../admin-theme.module.css'
 
 type Customer = {
   cusID: number,
@@ -60,7 +61,7 @@ export default function Page(){
         <h2>{locale === 'th' ? 'รายละเอียดลูกค้า' : 'Customer Details'}</h2>
         <div style={{display:'flex',gap:8,alignItems:'center'}}>
           <button onClick={toggleLocale} style={{padding:'6px 10px',borderRadius:6}}>{locale === 'th' ? 'TH' : 'EN'}</button>
-          <button onClick={()=>router.back()} style={{padding:8}}>{locale === 'th' ? 'ย้อนกลับ' : 'Back'}</button>
+          <button className={styles.btnBack} onClick={()=>router.back()}>{locale === 'th' ? 'ย้อนกลับ' : 'Back'}</button>
         </div>
       </div>
 
