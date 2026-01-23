@@ -61,7 +61,7 @@ export default function Page(){
       <div style={{display:'flex',justifyContent:'space-between',alignItems:'center'}}>
         <h2 className={styles.pageTitle}>{locale === 'th' ? 'รายละเอียดลูกค้า' : 'Customer Details'}</h2>
         <div style={{display:'flex',gap:8,alignItems:'center'}}>
-          <button onClick={toggleLocale} style={{padding:'6px 10px',borderRadius:6}}>{locale === 'th' ? 'TH' : 'EN'}</button>
+          <button className={styles.btnLocale} onClick={toggleLocale}>{locale === 'th' ? 'TH' : 'EN'}</button>
           <button className={styles.btnBack} onClick={()=>router.back()}>{locale === 'th' ? 'ย้อนกลับ' : 'Back'}</button>
         </div>
       </div>
