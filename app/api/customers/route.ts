@@ -15,7 +15,8 @@ export async function GET(req: NextRequest) {
       // ถ้ามี id ให้ดึงข้อมูลลูกค้าตาม id
       if (id) {
         const [rows]: any = await conn.query(
-          'SELECT cusID as id, fullname as name, email, phone, company, address FROM cus_detail WHERE cusID = ?',
+          `SELECT cusID, fullname, email, phone, company, address, subject, message, created_by, created_at
+           FROM cus_detail WHERE cusID = ?`,
           [id]
         )
         if (rows.length === 0) {
@@ -28,7 +29,7 @@ export async function GET(req: NextRequest) {
       // If no search query provided, return a default list (recent 100 customers)
       if (q.length < 1) {
         const [rows]: any = await conn.query(
-          `SELECT cusID as id, fullname as name, email, phone, company, address
+          `SELECT cusID, fullname, email, phone, company, address, subject, message, created_by, created_at
            FROM cus_detail
            ORDER BY fullname ASC
            LIMIT 100`
@@ -38,7 +39,7 @@ export async function GET(req: NextRequest) {
 
       const searchTerm = `%${q}%`
       const [rows]: any = await conn.query(
-        `SELECT cusID as id, fullname as name, email, phone, company, address
+        `SELECT cusID, fullname, email, phone, company, address, subject, message, created_by, created_at
          FROM cus_detail
          WHERE fullname LIKE ? OR email LIKE ? OR phone LIKE ? OR company LIKE ?
          ORDER BY fullname ASC
@@ -68,7 +69,7 @@ export async function POST(req: NextRequest) {
 
     const conn = await pool.getConnection()
     try {
-      const createdBy = 'thailand admin'
+        const createdBy = 'thailand admin'
       try {
         const [result]: any = await conn.query(
           `INSERT INTO cus_detail (fullname, email, phone, company, address, subject, message, created_by) VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
@@ -76,22 +77,14 @@ export async function POST(req: NextRequest) {
         )
 
         const customerId = result.insertId
+        // Fetch the inserted row to return full columns including created_at
+        const [rows]: any = await conn.query(
+          `SELECT cusID, fullname, email, phone, company, address, subject, message, created_by, created_at FROM cus_detail WHERE cusID = ?`,
+          [customerId]
+        )
+        const customerRow = rows && rows[0] ? rows[0] : null
 
-        return NextResponse.json({
-          success: true,
-          customerId,
-          customer: {
-            id: customerId,
-            name,
-            email,
-            phone,
-            company,
-            address,
-            subject: subject || null,
-            message: message || null,
-            created_by: createdBy
-          }
-        })
+        return NextResponse.json({ success: true, customerId, customer: customerRow })
       } catch (sqlErr: any) {
         // Detect missing column error (MySQL errno 1054)
         console.error('customers INSERT error:', sqlErr)
