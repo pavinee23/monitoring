@@ -19,6 +19,23 @@ type Customer = {
 export default function Page(){
   const router = useRouter()
   const [customers,setCustomers] = useState<Customer[]>([])
+  const [locale, setLocale] = useState<'th'|'en'>(() => {
+    try {
+      const l = localStorage.getItem('locale')
+      return l === 'en' ? 'en' : 'th'
+    } catch (e) {
+      return 'th'
+    }
+  })
+
+  // Toggle language and persist
+  function toggleLocale() {
+    const next = locale === 'th' ? 'en' : 'th'
+    setLocale(next)
+    try { localStorage.setItem('locale', next) } catch (e) {}
+    // broadcast change for other components if needed
+    try { window.dispatchEvent(new CustomEvent('locale-changed', { detail: { locale: next } })) } catch (e) {}
+  }
 
   // Fetch customers from API on mount
   useEffect(() => {
@@ -40,8 +57,11 @@ export default function Page(){
   return (
     <div style={styles.container}>
       <div style={{display:'flex',justifyContent:'space-between',alignItems:'center'}}>
-        <h2>รายละเอียดลูกค้า</h2>
-        <button onClick={()=>router.back()} style={{padding:8}}>ย้อนกลับ / Back</button>
+        <h2>{locale === 'th' ? 'รายละเอียดลูกค้า' : 'Customer Details'}</h2>
+        <div style={{display:'flex',gap:8,alignItems:'center'}}>
+          <button onClick={toggleLocale} style={{padding:'6px 10px',borderRadius:6}}>{locale === 'th' ? 'TH' : 'EN'}</button>
+          <button onClick={()=>router.back()} style={{padding:8}}>{locale === 'th' ? 'ย้อนกลับ' : 'Back'}</button>
+        </div>
       </div>
 
       <div style={{marginTop:12}}>
@@ -49,16 +69,16 @@ export default function Page(){
           <table style={styles.table}>
             <thead>
               <tr style={{textAlign:'left'}}>
-                <th>cusID</th>
-                <th>fullname</th>
-                <th>email</th>
-                <th>phone</th>
-                <th>company</th>
-                <th>address</th>
-                <th>subject</th>
-                <th>message</th>
-                <th>created_by</th>
-                <th>created_at</th>
+                <th>{locale === 'th' ? 'รหัส' : 'cusID'}</th>
+                <th>{locale === 'th' ? 'ชื่อ-นามสกุล' : 'fullname'}</th>
+                <th>{locale === 'th' ? 'อีเมล' : 'email'}</th>
+                <th>{locale === 'th' ? 'โทรศัพท์' : 'phone'}</th>
+                <th>{locale === 'th' ? 'บริษัท' : 'company'}</th>
+                <th>{locale === 'th' ? 'ที่อยู่' : 'address'}</th>
+                <th>{locale === 'th' ? 'หัวข้อ' : 'subject'}</th>
+                <th>{locale === 'th' ? 'ข้อความ' : 'message'}</th>
+                <th>{locale === 'th' ? 'สร้างโดย' : 'created_by'}</th>
+                <th>{locale === 'th' ? 'วันที่สร้าง' : 'created_at'}</th>
               </tr>
             </thead>
             <tbody>
