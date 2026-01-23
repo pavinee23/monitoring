@@ -53,19 +53,7 @@ export default function Page(){
         <h2>ลูกค้า / Customers</h2>
         <button onClick={()=>router.back()} style={{padding:8}}>ย้อนกลับ / Back</button>
       </div>
-      <div style={styles.card}>
-        <div style={{display:'flex',gap:8,marginBottom:8}}>
-          <input placeholder='ชื่อ / Name' value={form.name} onChange={e=>setForm({...form,name:e.target.value})} style={styles.input} />
-          <input placeholder='โทรศัพท์ / Phone' value={form.phone} onChange={e=>setForm({...form,phone:e.target.value})} style={styles.input} />
-        </div>
-        <div style={{display:'flex',gap:8,marginBottom:8}}>
-          <input placeholder='อีเมล / Email' value={form.email} onChange={e=>setForm({...form,email:e.target.value})} style={styles.input} />
-          <input placeholder='ที่อยู่ / Address' value={form.address} onChange={e=>setForm({...form,address:e.target.value})} style={styles.input} />
-        </div>
-        <div style={{display:'flex',gap:8}}>
-          <button onClick={add} style={{padding:8,background:'#0f172a',color:'#fff'}}>เพิ่มลูกค้า / Add customer</button>
-        </div>
-      </div>
+      {/* ฟอร์มเพิ่มลูกค้า ถูกเอาออกตามคำขอ */}
 
       <div style={{marginTop:12}}>
         {customers.length===0? <div style={{color:'#6b7280'}}>ยังไม่มีลูกค้า / No customers yet</div> : (
