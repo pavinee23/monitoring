@@ -2,14 +2,36 @@
 
 import React, { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
+import AdminLayout from '../components/AdminLayout'
+import styles from '../admin-theme.module.css'
 
-export default function Page() {
+export default function InvoicePage() {
   const router = useRouter()
   const [invoiceNo, setInvoiceNo] = useState('')
-  const [customer, setCustomer] = useState({ name: '', phone: '' })
+  const [customer, setCustomer] = useState({ name: '', phone: '', address: '' })
   const [items, setItems] = useState([{ desc: '', qty: 1, price: 0 }])
   const [taxRate, setTaxRate] = useState(7)
   const [totals, setTotals] = useState({ subtotal: 0, tax: 0, total: 0 })
+  const [locale, setLocale] = useState<'en' | 'th'>('en')
+
+  useEffect(() => {
+    try {
+      const l = localStorage.getItem('locale') || localStorage.getItem('k_system_lang')
+      if (l === 'th') setLocale('th')
+    } catch {}
+
+    const handler = (e: Event) => {
+      const d = (e as any).detail
+      const v = typeof d === 'string' ? d : d?.locale
+      if (v === 'en' || v === 'th') setLocale(v)
+    }
+    window.addEventListener('k-system-lang', handler)
+    window.addEventListener('locale-changed', handler)
+    return () => {
+      window.removeEventListener('k-system-lang', handler)
+      window.removeEventListener('locale-changed', handler)
+    }
+  }, [])
 
   useEffect(() => {
     const subtotal = items.reduce((s, it) => s + it.qty * Number(it.price || 0), 0)
@@ -17,7 +39,18 @@ export default function Page() {
     setTotals({ subtotal, tax, total: subtotal + tax })
   }, [items, taxRate])
 
-  function addItem() { setItems([...items, { desc: '', qty: 1, price: 0 }]) }
+  const L = (en: string, th: string) => locale === 'th' ? th : en
+
+  function addItem() {
+    setItems([...items, { desc: '', qty: 1, price: 0 }])
+  }
+
+  function removeItem(index: number) {
+    if (items.length > 1) {
+      setItems(items.filter((_, i) => i !== index))
+    }
+  }
+
   function updateItem(i: number, key: string, value: any) {
     const copy = [...items]
     // @ts-ignore
@@ -27,67 +60,197 @@ export default function Page() {
 
   function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
-    if (!invoiceNo) return alert('กรุณาใส่เลขที่ใบแจ้งหนี้ / Enter invoice number')
+    if (!invoiceNo) {
+      alert(L('Please enter invoice number', 'กรุณาใส่เลขที่ใบแจ้งหนี้'))
+      return
+    }
+    if (!customer.name) {
+      alert(L('Please enter customer name', 'กรุณาใส่ชื่อลูกค้า'))
+      return
+    }
     console.log({ invoiceNo, customer, items, totals })
-    alert('Invoice saved (demo)')
-  }
-
-  const styles: Record<string, React.CSSProperties> = {
-    container: { padding: 24, fontFamily: 'Inter, system-ui, Arial', maxWidth: 960, margin: 'auto' },
-    card: { background: '#fff', borderRadius: 8, padding: 20, boxShadow: '0 6px 18px rgba(0,0,0,0.06)' },
-    label: { fontSize: 14, fontWeight: 600, marginBottom: 6 },
-    input: { width: '100%', padding: 8, borderRadius: 6, border: '1px solid #e2e8f0' },
-    btn: { padding: '8px 12px', borderRadius: 6, border: 'none', cursor: 'pointer' }
+    alert(L('Invoice saved (demo)', 'บันทึกใบแจ้งหนี้แล้ว (demo)'))
   }
 
   return (
-    <div style={styles.container}>
-      <div style={{display:'flex',justifyContent:'space-between',alignItems:'center'}}>
-        <h2>ใบแจ้งหนี้ / Invoice</h2>
-        <button style={styles.btn} onClick={() => router.back()}>ย้อนกลับ / Back</button>
-      </div>
-      <form onSubmit={handleSubmit} style={styles.card}>
-        <div style={{marginBottom:12}}>
-          <div style={styles.label}>เลขที่ใบแจ้งหนี้ / Invoice No.</div>
-          <input value={invoiceNo} onChange={e=>setInvoiceNo(e.target.value)} style={styles.input} />
+    <AdminLayout title="Invoice" titleTh="ใบแจ้งหนี้">
+      <div className={styles.contentCard}>
+        <div className={styles.cardHeader}>
+          <h2 className={styles.cardTitle}>
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" style={{ marginRight: 12 }}>
+              <rect x="1" y="4" width="22" height="16" rx="2" ry="2"/>
+              <line x1="1" y1="10" x2="23" y2="10"/>
+            </svg>
+            {L('Create Invoice', 'สร้างใบแจ้งหนี้')}
+          </h2>
+          <p className={styles.cardSubtitle}>
+            {L('Create a new invoice for billing', 'สร้างใบแจ้งหนี้สำหรับเรียกเก็บเงิน')}
+          </p>
         </div>
-        <div style={{marginBottom:12}}>
-          <div style={styles.label}>ลูกค้า / Customer</div>
-          <div style={{display:'flex',gap:8}}>
-            <input placeholder='ชื่อลูกค้า / Name' value={customer.name} onChange={e=>setCustomer({...customer,name:e.target.value})} style={styles.input} />
-            <input placeholder='โทรศัพท์ / Phone' value={customer.phone} onChange={e=>setCustomer({...customer,phone:e.target.value})} style={styles.input} />
-          </div>
-        </div>
-        <div>
-          <div style={styles.label}>รายการ / Items</div>
-          {items.map((it,i)=> (
-            <div key={i} style={{display:'flex',gap:8,marginBottom:8}}>
-              <input placeholder='รายละเอียด' value={it.desc} onChange={e=>updateItem(i,'desc',e.target.value)} style={{...styles.input,flex:2}} />
-              <input type='number' min={1} value={it.qty} onChange={e=>updateItem(i,'qty',e.target.value)} style={{...styles.input,width:100}} />
-              <input type='number' min={0} value={it.price} onChange={e=>updateItem(i,'price',e.target.value)} style={{...styles.input,width:140}} />
+        <div className={styles.cardBody}>
+          <form onSubmit={handleSubmit}>
+            {/* Invoice Number */}
+            <div className={styles.sectionBox}>
+              <h3 className={styles.sectionTitle}>{L('Invoice Details', 'รายละเอียดใบแจ้งหนี้')}</h3>
+              <div className={styles.formRow}>
+                <div className={styles.formGroup}>
+                  <label className={styles.formLabel}>
+                    {L('Invoice No.', 'เลขที่ใบแจ้งหนี้')} <span style={{ color: '#dc2626' }}>*</span>
+                  </label>
+                  <input
+                    className={styles.formInput}
+                    placeholder={L('Enter invoice number', 'กรอกเลขที่ใบแจ้งหนี้')}
+                    value={invoiceNo}
+                    onChange={e => setInvoiceNo(e.target.value)}
+                  />
+                </div>
+                <div className={styles.formGroup}>
+                  <label className={styles.formLabel}>{L('Date', 'วันที่')}</label>
+                  <input
+                    type="date"
+                    className={styles.formInput}
+                    defaultValue={new Date().toISOString().split('T')[0]}
+                  />
+                </div>
+              </div>
             </div>
-          ))}
-          <button type='button' onClick={addItem} style={{...styles.btn,marginTop:8}}>เพิ่มรายการ / Add item</button>
-        </div>
 
-        <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',marginTop:12}}>
-          <div style={{flex:1}}>
-            <div style={styles.label}>VAT (%)</div>
-            <input type='number' min={0} value={taxRate} onChange={e=>setTaxRate(Number(e.target.value))} style={styles.input} />
-          </div>
-          <div style={{width:260,background:'#f8fafc',padding:12,borderRadius:8}}>
-            <div style={{fontWeight:700}}>สรุป / Summary</div>
-            <div>Subtotal: {totals.subtotal.toFixed(2)} ฿</div>
-            <div>Tax: {totals.tax.toFixed(2)} ฿</div>
-            <div style={{fontSize:18,fontWeight:800}}>Total: {totals.total.toFixed(2)} ฿</div>
-          </div>
-        </div>
+            {/* Customer Information */}
+            <div className={styles.sectionBox}>
+              <h3 className={styles.sectionTitle}>{L('Customer Information', 'ข้อมูลลูกค้า')}</h3>
+              <div className={styles.formRow}>
+                <div className={styles.formGroup}>
+                  <label className={styles.formLabel}>
+                    {L('Customer Name', 'ชื่อลูกค้า')} <span style={{ color: '#dc2626' }}>*</span>
+                  </label>
+                  <input
+                    className={styles.formInput}
+                    placeholder={L('Enter customer name', 'กรอกชื่อลูกค้า')}
+                    value={customer.name}
+                    onChange={e => setCustomer({ ...customer, name: e.target.value })}
+                  />
+                </div>
+                <div className={styles.formGroup}>
+                  <label className={styles.formLabel}>{L('Phone', 'โทรศัพท์')}</label>
+                  <input
+                    className={styles.formInput}
+                    placeholder={L('Phone number', 'หมายเลขโทรศัพท์')}
+                    value={customer.phone}
+                    onChange={e => setCustomer({ ...customer, phone: e.target.value })}
+                  />
+                </div>
+              </div>
+              <div className={styles.formGroup}>
+                <label className={styles.formLabel}>{L('Address', 'ที่อยู่')}</label>
+                <textarea
+                  className={styles.formTextarea}
+                  placeholder={L('Customer address', 'ที่อยู่ลูกค้า')}
+                  value={customer.address}
+                  onChange={e => setCustomer({ ...customer, address: e.target.value })}
+                  rows={3}
+                />
+              </div>
+            </div>
 
-        <div style={{marginTop:12,display:'flex',gap:8}}>
-          <button type='submit' style={{...styles.btn,background:'#0f172a',color:'#fff'}}>บันทึก / Save</button>
+            {/* Items */}
+            <div className={styles.sectionBox}>
+              <h3 className={styles.sectionTitle}>{L('Invoice Items', 'รายการ')}</h3>
+              {items.map((it, i) => (
+                <div key={i} style={{ display: 'flex', gap: 12, marginBottom: 12, alignItems: 'flex-end' }}>
+                  <div style={{ flex: 2 }}>
+                    <label className={styles.formLabel}>{L('Description', 'รายละเอียด')}</label>
+                    <input
+                      className={styles.formInput}
+                      placeholder={L('Item description', 'รายละเอียดสินค้า')}
+                      value={it.desc}
+                      onChange={e => updateItem(i, 'desc', e.target.value)}
+                    />
+                  </div>
+                  <div style={{ width: 100 }}>
+                    <label className={styles.formLabel}>{L('Qty', 'จำนวน')}</label>
+                    <input
+                      type="number"
+                      min={1}
+                      className={styles.formInput}
+                      value={it.qty}
+                      onChange={e => updateItem(i, 'qty', e.target.value)}
+                    />
+                  </div>
+                  <div style={{ width: 140 }}>
+                    <label className={styles.formLabel}>{L('Price', 'ราคา')}</label>
+                    <input
+                      type="number"
+                      min={0}
+                      className={styles.formInput}
+                      value={it.price}
+                      onChange={e => updateItem(i, 'price', e.target.value)}
+                    />
+                  </div>
+                  <div style={{ width: 100, textAlign: 'right', paddingBottom: 8 }}>
+                    <strong>{(it.qty * Number(it.price || 0)).toLocaleString()} ฿</strong>
+                  </div>
+                  {items.length > 1 && (
+                    <button
+                      type="button"
+                      onClick={() => removeItem(i)}
+                      className={`${styles.btn} ${styles.btnDanger} ${styles.btnSmall}`}
+                      style={{ marginBottom: 8 }}
+                    >
+                      {L('Remove', 'ลบ')}
+                    </button>
+                  )}
+                </div>
+              ))}
+              <button type="button" onClick={addItem} className={`${styles.btn} ${styles.btnSecondary}`}>
+                + {L('Add Item', 'เพิ่มรายการ')}
+              </button>
+            </div>
+
+            {/* Summary */}
+            <div className={styles.formRow}>
+              <div className={styles.formGroup}>
+                <label className={styles.formLabel}>{L('VAT (%)', 'ภาษีมูลค่าเพิ่ม (%)')}</label>
+                <input
+                  type="number"
+                  min={0}
+                  className={styles.formInput}
+                  value={taxRate}
+                  onChange={e => setTaxRate(Number(e.target.value))}
+                />
+              </div>
+              <div style={{
+                background: 'linear-gradient(135deg, #fff7ed 0%, #ffedd5 100%)',
+                borderRadius: 8,
+                padding: 16,
+                minWidth: 220,
+                border: '1px solid #fed7aa'
+              }}>
+                <div style={{ fontWeight: 700, marginBottom: 8, color: '#c2410c' }}>{L('Summary', 'สรุปยอด')}</div>
+                <div style={{ fontSize: 13, color: '#64748b' }}>{L('Subtotal', 'ยอดรวมย่อย')}: {totals.subtotal.toLocaleString()} ฿</div>
+                <div style={{ fontSize: 13, color: '#64748b' }}>{L('Tax', 'ภาษี')}: {totals.tax.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })} ฿</div>
+                <div style={{ marginTop: 8, fontSize: 20, fontWeight: 800, color: '#9a3412' }}>
+                  {L('Total', 'รวม')}: {totals.total.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })} ฿
+                </div>
+              </div>
+            </div>
+
+            {/* Actions */}
+            <div style={{ display: 'flex', gap: 12, marginTop: 24, paddingTop: 16, borderTop: '1px solid #e5e7eb' }}>
+              <button type="submit" className={`${styles.btn} ${styles.btnWarning} ${styles.btnLarge}`}>
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" style={{ marginRight: 8 }}>
+                  <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/>
+                  <polyline points="17 21 17 13 7 13 7 21"/>
+                  <polyline points="7 3 7 8 15 8"/>
+                </svg>
+                {L('Save Invoice', 'บันทึกใบแจ้งหนี้')}
+              </button>
+              <button type="button" onClick={() => router.back()} className={`${styles.btn} ${styles.btnSecondary} ${styles.btnLarge}`}>
+                {L('Cancel', 'ยกเลิก')}
+              </button>
+            </div>
+          </form>
         </div>
-      </form>
-    </div>
+      </div>
+    </AdminLayout>
   )
 }
-

@@ -43,7 +43,7 @@ export default function HomePage() {
 			</section>
 
 			{/* Features Section */}
-			<section className="py-5 bg-light">
+			<section className="py-5" style={{ background: 'linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%)' }}>
 				<div className="container py-5">
 					<h2 className="section-title">Why Choose K Energy Save?</h2>
 					<div className="row g-4">
@@ -94,7 +94,7 @@ export default function HomePage() {
 			</section>
 
 			{/* Products Section */}
-			<section id="products" className="py-5">
+			<section id="products" className="py-5" style={{ background: 'linear-gradient(135deg, #ffffff 0%, #f0f9ff 100%)' }}>
 				<div className="container py-5">
 					<h2 className="section-title">Our Products</h2>
 					<div className="row g-4">
@@ -142,7 +142,7 @@ export default function HomePage() {
 			</section>
 
 			{/* Contact Section */}
-			<section className="py-5" style={{ background: 'linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%)' }}>
+			<section className="py-5" style={{ background: 'linear-gradient(135deg, #3b82f6 0%, #60a5fa 50%, #93c5fd 100%)' }}>
 				<div className="container py-5">
 					<h2 className="section-title text-white">Contact Us</h2>
 					<div className="row g-4">

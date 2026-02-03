@@ -235,7 +235,8 @@ export default function PowerCalculatorPage() {
         const month = monthNames[monthIndex] || item.period
         const monthThName = monthNamesTh[monthIndex] || item.period
         const cost = kwh * Number(unitPrice || 0)
-        rows.push({ month: `${item.period} (${month})`, monthTh: `${item.period} (${monthThName})`, kwh, cost, period: item.period })
+        // show only month name (no year) per UI request
+        rows.push({ month: month, monthTh: monthThName, kwh, cost, period: item.period, index: i })
         totalKwh += kwh
         if (kwh > 0) filledMonths++
       }
@@ -259,11 +260,21 @@ export default function PowerCalculatorPage() {
 
   // Function to update monthly kWh value
   const updateMonthlyKwh = (index: number, value: number) => {
-    setMonthlyKwh(prev => {
-      const newArr = [...prev]
-      newArr[index] = value
-      return newArr
-    })
+    // Update twelveMonths if it has 12 items (preferred data source)
+    if (twelveMonths && twelveMonths.length === 12) {
+      setTwelveMonths(prev => {
+        const newArr = [...prev]
+        newArr[index] = { ...newArr[index], kwh: value }
+        return newArr
+      })
+    } else {
+      // Fallback: update monthlyKwh for Jan-Dec
+      setMonthlyKwh(prev => {
+        const newArr = [...prev]
+        newArr[index] = value
+        return newArr
+      })
+    }
   }
 
   // Sync `usageHistory` from `twelveMonths` (preferred) or from `monthlyKwh` as fallback.
@@ -323,8 +334,8 @@ export default function PowerCalculatorPage() {
 
   // Compute power analysis summary values
   const powerAnalysis = useMemo(() => {
-    const monthlySavingsKwh = avgMonthlyUsage * (powerSavingRate / 100)
-    const monthlySavingsBaht = monthlySavingsKwh * unitPrice
+    const monthlySavingsBaht = (monthlyElectricitySummary?.avgCost || 0) * (powerSavingRate / 100)
+    const monthlySavingsKwh = (monthlyElectricitySummary?.avgKwh || 0) * (powerSavingRate / 100)
     const annualSavingsBaht = monthlySavingsBaht * 12
     const carbonReduction = monthlySavingsKwh * 12 * emissionFactor
     const monthlyPayment = paymentMonths > 0 ? productPrice / paymentMonths : 0
@@ -352,7 +363,7 @@ export default function PowerCalculatorPage() {
       roiYears,
       roiTableData
     }
-  }, [avgMonthlyUsage, powerSavingRate, unitPrice, emissionFactor, productPrice, paymentMonths])
+  }, [monthlyElectricitySummary, powerSavingRate, emissionFactor, productPrice, paymentMonths])
 
   return (
     <AdminLayout title="Power Calculator" titleTh="เครื่องคิดกำลังไฟฟ้า">
@@ -817,9 +828,14 @@ export default function PowerCalculatorPage() {
                       <td style={{ border: '1px solid #ddd', padding: '8px 12px' }}></td>
                     </tr>
                     <tr>
-                      <td style={{ border: '1px solid #ddd', padding: '8px 12px', background: '#fffde7' }}>{L('Electric faucet method', 'วิธีการวัดไฟฟ้า')}</td>
+                      <td style={{ border: '1px solid #ddd', padding: '8px 12px', background: '#fffde7' }}>{L('Electric system', 'ระบบไฟฟ้า')}</td>
                       <td style={{ border: '1px solid #ddd', padding: '8px 12px', textAlign: 'right' }}>
-                        <input type="text" className={styles.formInput} value={faucetMethod || ''} onChange={e => setFaucetMethod(e.target.value)} style={{ width: 100, textAlign: 'right' }} />
+                        <select className={styles.formSelect} value={faucetMethod || ''} onChange={e => setFaucetMethod(e.target.value)} style={{ width: 150 }}>
+                          <option value="">{L('-- Select --', '-- เลือก --')}</option>
+                          <option value="1Φ 2W">{L('1Φ 2W (1 phase 2 wire)', '1Φ 2W (1 เฟส 2 สาย)')}</option>
+                          <option value="3Φ 3W Δ">{L('3Φ 3W Δ (3 phase 3 wire, Delta)', '3Φ 3W Δ (3 เฟส 3 สาย เดลต้า)')}</option>
+                          <option value="3Φ 4W Y">{L('3Φ 4W Y (3 phase 4 wire, Y)', '3Φ 4W Y (3 เฟส 4 สาย วาย)')}</option>
+                        </select>
                       </td>
                       <td style={{ border: '1px solid #ddd', padding: '8px 12px' }}></td>
                     </tr>
@@ -843,7 +859,7 @@ export default function PowerCalculatorPage() {
                   <tbody>
                     <tr>
                       <td style={{ border: '1px solid #ddd', padding: '8px 12px', background: '#fffde7' }}>{L('Monthly average', 'ค่าเฉลี่ยรายเดือน')}</td>
-                      <td style={{ border: '1px solid #ddd', padding: '8px 12px', textAlign: 'right', fontWeight: 600 }}>{avgMonthlyUsage.toLocaleString()}</td>
+                      <td style={{ border: '1px solid #ddd', padding: '8px 12px', textAlign: 'right', fontWeight: 600 }}>{monthlyElectricitySummary.avgCost.toLocaleString(undefined, { maximumFractionDigits: 0 })} <span style={{ color: '#d00', fontWeight: 600 }}>{L('Baht', 'บาท')}</span></td>
                       <td style={{ border: '1px solid #ddd', padding: '8px 12px', color: '#d00' }}>
                         {L('Usage for', 'ใช้งาน')} <input type="number" value={usageDataMonths} onChange={e => setUsageDataMonths(Number(e.target.value || 0))} style={{ width: 50, textAlign: 'center', border: '1px solid #ccc', borderRadius: 4 }} /> {L('months', 'เดือน')}
                       </td>
@@ -857,12 +873,12 @@ export default function PowerCalculatorPage() {
                     </tr>
                     <tr>
                       <td style={{ border: '1px solid #ddd', padding: '8px 12px', background: '#fffde7' }}>{L('Monthly savings', 'การประหยัดรายเดือน')}</td>
-                      <td style={{ border: '1px solid #ddd', padding: '8px 12px', textAlign: 'right', fontWeight: 600 }}>{powerAnalysis.monthlySavingsBaht.toLocaleString(undefined, { maximumFractionDigits: 0 })}</td>
+                      <td style={{ border: '1px solid #ddd', padding: '8px 12px', textAlign: 'right', fontWeight: 600 }}>{powerAnalysis.monthlySavingsBaht.toLocaleString(undefined, { maximumFractionDigits: 0 })} <span style={{ color: '#d00', fontWeight: 600 }}>{L('Baht', 'บาท')}</span></td>
                       <td style={{ border: '1px solid #ddd', padding: '8px 12px' }}></td>
                     </tr>
                     <tr>
                       <td style={{ border: '1px solid #ddd', padding: '8px 12px', background: '#fffde7' }}>{L('Annual savings', 'การประหยัดรายปี')}</td>
-                      <td style={{ border: '1px solid #ddd', padding: '8px 12px', textAlign: 'right', fontWeight: 600 }}>{powerAnalysis.annualSavingsBaht.toLocaleString(undefined, { maximumFractionDigits: 0 })}</td>
+                      <td style={{ border: '1px solid #ddd', padding: '8px 12px', textAlign: 'right', fontWeight: 600 }}>{((monthlyElectricitySummary?.avgCost || 0) * (powerSavingRate / 100) * 12).toLocaleString(undefined, { maximumFractionDigits: 0 })} <span style={{ color: '#d00', fontWeight: 600 }}>{L('Baht', 'บาท')}</span></td>
                       <td style={{ border: '1px solid #ddd', padding: '8px 12px', color: '#d00' }}>12 {L('months', 'เดือน')}</td>
                     </tr>
                     <tr>
@@ -904,7 +920,7 @@ export default function PowerCalculatorPage() {
                     <tr>
                       <td style={{ border: '1px solid #ddd', padding: '8px 12px', background: '#fffde7' }}>{L('Product price', 'ราคาสินค้า')}</td>
                       <td style={{ border: '1px solid #ddd', padding: '8px 12px', textAlign: 'right' }}>
-                        <input type="number" className={styles.formInput} value={productPrice || ''} onChange={e => setProductPrice(Number(e.target.value || 0))} style={{ width: 120, textAlign: 'right' }} />
+                        <input type="number" className={styles.formInput} value={productPrice || ''} onChange={e => setProductPrice(Number(e.target.value || 0))} style={{ width: 120, textAlign: 'right' }} /> <span style={{ color: '#d00', fontWeight: 600 }}>{L('Baht', 'บาท')}</span>
                       </td>
                       <td style={{ border: '1px solid #ddd', padding: '8px 12px' }}></td>
                     </tr>
@@ -934,51 +950,116 @@ export default function PowerCalculatorPage() {
                 </table>
               </div>
 
-              {/* ROI Display */}
+              {/* ROI Display - Prominent */}
               <div style={{ marginBottom: 20, display: 'flex', alignItems: 'center', gap: 20 }}>
                 <div style={{ background: '#255899', color: '#fff', padding: '8px 12px', fontWeight: 600, fontSize: 14 }}>
                   ■ ROI
                 </div>
-                <div style={{ background: '#fffde7', border: '2px solid #255899', padding: '12px 24px', borderRadius: 8 }}>
-                  <span style={{ fontSize: 32, fontWeight: 700, color: '#d00' }}>{powerAnalysis.roiYears.toFixed(1)}</span>
-                  <span style={{ fontSize: 14, marginLeft: 8, color: '#666' }}>({L('year/month', 'ปี/เดือน')})</span>
+                <div style={{
+                  background: 'linear-gradient(135deg, #fffde7 0%, #fff9c4 100%)',
+                  border: '3px solid #255899',
+                  padding: '16px 32px',
+                  borderRadius: 8,
+                  boxShadow: '0 4px 12px rgba(37,88,153,0.15)'
+                }}>
+                  <span style={{ fontSize: 48, fontWeight: 800, color: '#d00' }}>{powerAnalysis.roiYears.toFixed(1)}</span>
+                  <span style={{ fontSize: 16, marginLeft: 12, color: '#555', fontWeight: 600 }}>({L('year/month', 'ปี/เดือน')})</span>
                 </div>
               </div>
 
               {/* ROI Table with Progress Bars */}
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 20 }}>
                 <div>
-                  <table style={{ width: '100%', borderCollapse: 'collapse', border: '1px solid #ddd', fontSize: 13 }}>
+                  {(() => {
+                    // compute scale for cumulative bars (ensure non-zero)
+                    const allCum = (powerAnalysis.roiTableData || []).map(r => Math.abs(Number(r.cumulative || 0)))
+                    const maxAbs = Math.max(1, Number(productPrice || 0), ...(allCum.length ? allCum : [0]))
+                    return (
+                      <React.Fragment>
+                        {/* expose maxAbs via a data attr if needed */}
+                        <div style={{ display: 'none' }} data-maxabs={maxAbs}></div>
+                      </React.Fragment>
+                    )
+                  })()}
+                
+                  <table style={{ width: '100%', borderCollapse: 'collapse', border: '1px solid #ddd', fontSize: 12 }}>
                     <thead>
-                      <tr style={{ background: '#255899', color: '#fff' }}>
-                        <th style={{ border: '1px solid #ddd', padding: '6px 8px', textAlign: 'center' }}>{L('Year', 'ปี')}</th>
-                        <th style={{ border: '1px solid #ddd', padding: '6px 8px', textAlign: 'right' }}>{L('Annual savings', 'ประหยัด/ปี')}</th>
-                        <th style={{ border: '1px solid #ddd', padding: '6px 8px', textAlign: 'left', width: '40%' }}>
-                          <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                            <span>{L('Cumulative', 'สะสม')}</span>
-                            <span style={{ color: '#ff0' }}>▼{productPrice.toLocaleString()}</span>
-                          </div>
+                      <tr style={{ background: '#f8f9fa' }}>
+                        <th colSpan={2} style={{ border: '1px solid #ddd', padding: '4px 8px', textAlign: 'center', background: '#fff' }}></th>
+                        <th colSpan={2} style={{ border: '1px solid #ddd', padding: '4px 8px', textAlign: 'center', background: '#fffde7' }}>
+                          <span style={{ fontWeight: 700, color: '#333' }}>{L('Cumulative', 'สะสม')}</span>
+                        </th>
+                      </tr>
+                      <tr style={{ background: '#f8f9fa' }}>
+                        <th colSpan={2} style={{ border: '1px solid #ddd', padding: '4px 8px', textAlign: 'center', background: '#fff' }}></th>
+                        <th style={{ border: '1px solid #ddd', padding: '4px 8px', textAlign: 'center', background: '#fffde7' }}>
+                          <span style={{ fontWeight: 700, color: '#333' }}>{L('Investment', 'การลงทุน')}</span>
+                        </th>
+                        <th style={{ border: '1px solid #ddd', padding: '4px 8px', textAlign: 'center', background: '#d4edda', color: '#155724', fontWeight: 700 }}>
+                          ▼{productPrice.toLocaleString()}
+                        </th>
+                      </tr>
+                      <tr style={{ background: '#e8f5e9' }}>
+                        <th style={{ border: '1px solid #ddd', padding: '6px 8px', textAlign: 'center', background: '#fffde7' }}>{L('Year', 'ปี')}</th>
+                        <th style={{ border: '1px solid #ddd', padding: '6px 8px', textAlign: 'right', background: '#fffde7' }}>{L('Annual savings', 'ประหยัด/ปี')}</th>
+                        <th colSpan={2} style={{ border: '1px solid #ddd', padding: '6px 8px', textAlign: 'left', width: '50%', background: '#e8f5e9' }}>
+                          {L('Progress', 'ความคืบหน้า')}
                         </th>
                       </tr>
                     </thead>
                     <tbody>
                       {powerAnalysis.roiTableData.map((row) => (
-                        <tr key={row.year}>
-                          <td style={{ border: '1px solid #ddd', padding: '4px 8px', textAlign: 'center' }}>{row.year}</td>
-                          <td style={{ border: '1px solid #ddd', padding: '4px 8px', textAlign: 'right' }}>{row.annualSavings.toLocaleString(undefined, { maximumFractionDigits: 0 })}</td>
-                          <td style={{ border: '1px solid #ddd', padding: '4px 8px', position: 'relative' }}>
-                            <div style={{
-                              position: 'absolute',
-                              left: 0,
-                              top: 0,
-                              bottom: 0,
-                              width: `${row.progressPercent}%`,
-                              background: `linear-gradient(90deg, #ff6b6b 0%, #ffd93d 30%, #6bcb77 100%)`,
-                              opacity: 0.7
-                            }} />
-                            <span style={{ position: 'relative', zIndex: 1, fontWeight: row.cumulative >= 0 ? 600 : 400, color: row.cumulative >= 0 ? '#006600' : '#000' }}>
-                              {row.cumulative.toLocaleString(undefined, { maximumFractionDigits: 0 })}
-                            </span>
+                        <tr key={row.year} style={{ background: row.cumulative >= 0 ? '#f0fff4' : '#fff' }}>
+                          <td style={{ border: '1px solid #ddd', padding: '4px 8px', textAlign: 'center', fontWeight: 600 }}>{row.year}</td>
+                          <td style={{ border: '1px solid #ddd', padding: '4px 8px', textAlign: 'right', color: '#2563eb' }}>{row.annualSavings.toLocaleString(undefined, { maximumFractionDigits: 0 })}</td>
+                          <td colSpan={2} style={{ border: '1px solid #ddd', padding: '4px 8px' }}>
+                            {(() => {
+                              const cum = Number(row.cumulative || 0)
+                              const all = (powerAnalysis.roiTableData || []).map(r => Math.abs(Number(r.cumulative || 0)))
+                              const maxAbs = Math.max(1, Number(productPrice || 0), ...(all.length ? all : [0]))
+                              const ratio = Math.min(1, Math.abs(cum) / maxAbs)
+                              // use full cell width scaling so widthPercent maps 0-100%
+                              // amplify negative bars so they appear longer to the left
+                              const NEG_SCALE = 0.4 // smaller divisor -> longer negative bars
+                              let widthPercent = Math.round(ratio * 100)
+                              if (cum < 0) {
+                                widthPercent = Math.round(Math.min(1, Math.abs(cum) / (maxAbs * NEG_SCALE)) * 100)
+                              }
+
+                              const labelColor = cum < 0 ? '#c62828' : '#006600'
+
+                              return (
+                                <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                                  <div style={{ minWidth: 90, textAlign: 'right', color: labelColor, fontWeight: 700, fontSize: 12 }}>
+                                    {cum.toLocaleString(undefined, { maximumFractionDigits: 0 })}
+                                  </div>
+                                  <div style={{ flex: 1, height: 16, background: '#f5f5f5', borderRadius: 2, position: 'relative', overflow: 'hidden' }}>
+                                    {/* Positive = green bar from left, Negative = red bar from right */}
+                                    {cum < 0 ? (
+                                      <div style={{
+                                        position: 'absolute',
+                                        right: 0,
+                                        top: 0,
+                                        height: '100%',
+                                        width: `${widthPercent}%`,
+                                        background: 'linear-gradient(90deg, #ff6b6b 0%, #ee5a5a 100%)',
+                                        transition: 'width 300ms ease'
+                                      }} />
+                                    ) : (
+                                      <div style={{
+                                        position: 'absolute',
+                                        left: 0,
+                                        top: 0,
+                                        height: '100%',
+                                        width: `${widthPercent}%`,
+                                        background: 'linear-gradient(90deg, #4ade80 0%, #22c55e 100%)',
+                                        transition: 'width 300ms ease'
+                                      }} />
+                                    )}
+                                  </div>
+                                </div>
+                              )
+                            })()}
                           </td>
                         </tr>
                       ))}

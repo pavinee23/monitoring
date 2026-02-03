@@ -18,7 +18,7 @@ export default function ContactPage() {
 	const [error, setError] = useState<string | null>(null)
 
 	// Language state
-	const [language, setLanguage] = useState<'en' | 'th' | 'ko' | 'zh'>('en')
+	const [language, setLanguage] = useState<'en' | 'th' | 'ko' | 'zh' | 'vi'>('en')
 
 	// Chatbot state
 	const [chatOpen, setChatOpen] = useState(false)
@@ -184,6 +184,45 @@ export default function ContactPage() {
 			chatInitial: '您好！有什么可以帮您的吗？',
 			privacyPolicy: '隐私政策',
 			adminLogin: '管理员登录'
+		},
+		vi: {
+			title: 'Liên hệ chúng tôi',
+			subtitle: 'Liên hệ',
+			description: 'Bạn có thắc mắc về các giải pháp tiết kiệm năng lượng của chúng tôi? Vui lòng điền vào biểu mẫu bên dưới và nhóm của chúng tôi sẽ trả lời trong vòng 24 giờ.',
+			name: 'Họ và tên',
+			namePlaceholder: 'Nguyễn Văn A',
+			email: 'Địa chỉ Email',
+			emailPlaceholder: 'nguyen@example.com',
+			phone: 'Số điện thoại',
+			phonePlaceholder: '+84 912 345 678',
+			company: 'Tên công ty (Tuỳ chọn)',
+			companyPlaceholder: 'Công ty của bạn',
+			subject: 'Chủ đề',
+			subjectProduct: 'Hỏi về sản phẩm',
+			subjectSupport: 'Hỗ trợ kỹ thuật',
+			subjectQuotation: 'Yêu cầu báo giá',
+			subjectPartnership: 'Hợp tác kinh doanh',
+			subjectOther: 'Khác',
+			selectSubject: 'Chọn chủ đề',
+			message: 'Nội dung',
+			messagePlaceholder: 'Hãy cho chúng tôi biết nhu cầu tiết kiệm năng lượng của bạn...',
+			submit: 'Gửi',
+			sending: 'Đang gửi...',
+			successTitle: 'Gửi tin nhắn thành công!',
+			successMessage: 'Cảm ơn bạn đã liên hệ. Nhóm của chúng tôi sẽ trả lời trong vòng 24 giờ.',
+			otherWays: 'Cách liên hệ khác',
+			phoneLabel: 'Điện thoại',
+			emailLabel: 'Email',
+			lineLabel: 'LINE Official',
+			hoursLabel: 'Giờ làm việc',
+			hoursValue: 'Thứ Hai - Thứ Sáu 9:00-18:00',
+			chatButton: 'Trò chuyện với chúng tôi',
+			chatTitle: 'K Energy Save',
+			chatOnline: 'Trực tuyến',
+			chatPlaceholder: 'Nhập tin nhắn của bạn...',
+			chatInitial: 'Xin chào! Tôi có thể giúp gì cho bạn hôm nay?',
+			privacyPolicy: 'Chính sách bảo mật',
+			adminLogin: 'Đăng nhập quản trị'
 		}
 	}
 
@@ -196,7 +235,7 @@ export default function ContactPage() {
 	}, [])
 
 	// Update chat initial message when language changes
-	const handleLanguageChange = (lang: 'en' | 'th' | 'ko' | 'zh') => {
+	const handleLanguageChange = (lang: 'en' | 'th' | 'ko' | 'zh' | 'vi') => {
 		setLanguage(lang)
 		setChatMessages([{ text: translations[lang].chatInitial, sender: 'bot' }])
 	}
@@ -269,6 +308,7 @@ export default function ContactPage() {
 		const isThai = /[\u0E00-\u0E7F]/.test(message)
 		const isKorean = /[\uAC00-\uD7AF]/.test(message)
 		const isChinese = /[\u4E00-\u9FFF]/.test(message)
+		const isVietnamese = /[àáạảãâầấậẩẫăằắặẳẵèéẹẻẽêềếệểễìíịỉĩòóọỏõôồốộổỗơờớợởỡùúụủũưừứựửữỳýỵỷỹđ]/i.test(message)
 
 		// Thai responses
 		if (isThai) {
@@ -317,6 +357,30 @@ export default function ContactPage() {
 				return '您好！欢迎来到 K Energy Save 👋\n\n我们是专业的节能解决方案提供商，业务遍及40多个国家。\n\n有什么可以帮您的？\n\n• 产品信息\n• 价格与报价\n• 安装服务\n• 技术支持'
 			}
 			return '😊 感谢您的咨询！\n\n我可以帮助您了解：\n• 产品信息 (K-SAVER)\n• 价格与报价\n• 安装服务\n• 技术支持\n\n直接联系我们：\n📞 +82 31-427-1380\n📧 info@kenergy-save.com\n\n还有什么想了解的吗？'
+		}
+
+		// Vietnamese responses
+		if (isVietnamese) {
+			if (lowerMsg.includes('xin chào') || lowerMsg.includes('chào') || lowerMsg.includes('hello')) {
+				return 'Xin chào! Chào mừng đến với K Energy Save 👋\n\nChúng tôi chuyên về giải pháp tiết kiệm năng lượng được tin dùng tại 40+ quốc gia.\n\nTôi có thể giúp gì cho bạn?\n\n• Thông tin sản phẩm\n• Giá cả & Báo giá\n• Dịch vụ lắp đặt\n• Hỗ trợ kỹ thuật'
+			}
+			if (lowerMsg.includes('sản phẩm') || lowerMsg.includes('k-saver')) {
+				return '⚡ Dòng sản phẩm K-SAVER:\n\n✓ K-SAVER 10 - Cho cơ sở nhỏ (10-50 kW)\n✓ K-SAVER 30 - Cho cơ sở trung bình (50-150 kW)\n✓ K-SAVER Max - Cho nhà máy công nghiệp lớn (150+ kW)\n\n🌟 Lợi ích chính:\n• Tiết kiệm 7-15% điện năng\n• Công nghệ được cấp bằng sáng chế\n• Hoàn vốn trong 12-24 tháng\n• Không cần bảo trì\n\nBạn muốn biết thêm về model nào?'
+			}
+			if (lowerMsg.includes('giá') || lowerMsg.includes('báo giá') || lowerMsg.includes('chi phí')) {
+				return '💰 Thông tin giá:\n\nGiá phụ thuộc vào:\n• Quy mô và mức tiêu thụ điện\n• Độ phức tạp lắp đặt\n• Model được chọn\n\n📋 Yêu cầu báo giá miễn phí:\n📞 Điện thoại: +82 31-427-1380\n📧 Email: info@kenergy-save.com\n💬 LINE: @534znjie\n\nChúng tôi có kế hoạch trả góp và phân tích ROI!'
+			}
+			if (lowerMsg.includes('lắp đặt') || lowerMsg.includes('cài đặt')) {
+				return '🔧 Quy trình lắp đặt:\n\n1️⃣ Khảo sát và đánh giá (miễn phí)\n2️⃣ Thiết kế giải pháp tùy chỉnh\n3️⃣ Lắp đặt bởi chuyên gia (2-6 giờ)\n4️⃣ Kiểm tra và nghiệm thu\n5️⃣ Đào tạo và tài liệu\n6️⃣ Dịch vụ hậu mãi\n\n✓ Kỹ thuật viên được chứng nhận\n✓ Không ảnh hưởng hoạt động\n✓ Hỗ trợ kỹ thuật 24/7'
+			}
+			if (lowerMsg.includes('tiết kiệm') || lowerMsg.includes('giảm') || lowerMsg.includes('hoàn vốn')) {
+				return '💡 Tiết kiệm năng lượng:\n\n📊 Tiết kiệm trung bình: 7-15%\n💵 Hoàn vốn: 12-24 tháng\n📈 Tuổi thọ: 10+ năm\n\n💰 Ví dụ:\nHóa đơn điện hàng tháng: $3,000\nTiết kiệm (10%): $300/tháng\nTiết kiệm hàng năm: $3,600\nThời gian hoàn vốn: 18 tháng\n\nBạn muốn phân tích tiết kiệm cụ thể?'
+			}
+			if (lowerMsg.includes('liên hệ') || lowerMsg.includes('gọi') || lowerMsg.includes('địa chỉ')) {
+				return '📞 Liên hệ K Energy Save:\n\n📱 Điện thoại: +82 31-427-1380\n📧 Email: info@kenergy-save.com\n💬 LINE: @534znjie\n\n🏢 Giờ làm việc:\nThứ Hai - Thứ Sáu: 9:00 - 18:00\n\nHoặc điền form liên hệ, chúng tôi sẽ phản hồi trong 24 giờ!'
+			}
+			// Default Vietnamese
+			return '😊 Cảm ơn bạn đã liên hệ!\n\nTôi có thể giúp bạn về:\n• Thông tin sản phẩm (K-SAVER)\n• Giá cả & Báo giá\n• Dịch vụ lắp đặt\n• Hỗ trợ kỹ thuật\n• Tính toán tiết kiệm\n• Bảo hành\n\nLiên hệ trực tiếp:\n📞 +82 31-427-1380\n📧 info@kenergy-save.com\n💬 LINE: @534znjie\n\nBạn muốn biết thêm điều gì?'
 		}
 
 		// English responses (default)
@@ -447,7 +511,7 @@ export default function ContactPage() {
 							...(language === 'en' ? styles.langButtonActive : {})
 						}}
 					>
-						🇬🇧 EN
+						<img src="https://flagcdn.com/20x15/gb.png" alt="EN" style={{ width: '20px', height: '15px', marginRight: '6px' }} /> EN
 					</button>
 					<button
 						onClick={() => handleLanguageChange('th')}
@@ -456,7 +520,7 @@ export default function ContactPage() {
 							...(language === 'th' ? styles.langButtonActive : {})
 						}}
 					>
-						🇹🇭 TH
+						<img src="https://flagcdn.com/20x15/th.png" alt="TH" style={{ width: '20px', height: '15px', marginRight: '6px' }} /> TH
 					</button>
 					<button
 						onClick={() => handleLanguageChange('ko')}
@@ -465,7 +529,7 @@ export default function ContactPage() {
 							...(language === 'ko' ? styles.langButtonActive : {})
 						}}
 					>
-						🇰🇷 KO
+						<img src="https://flagcdn.com/20x15/kr.png" alt="KO" style={{ width: '20px', height: '15px', marginRight: '6px' }} /> KO
 					</button>
 					<button
 						onClick={() => handleLanguageChange('zh')}
@@ -474,7 +538,16 @@ export default function ContactPage() {
 							...(language === 'zh' ? styles.langButtonActive : {})
 						}}
 					>
-						🇨🇳 ZH
+						<img src="https://flagcdn.com/20x15/cn.png" alt="ZH" style={{ width: '20px', height: '15px', marginRight: '6px' }} /> ZH
+					</button>
+					<button
+						onClick={() => handleLanguageChange('vi')}
+						style={{
+							...styles.langButton,
+							...(language === 'vi' ? styles.langButtonActive : {})
+						}}
+					>
+						<img src="https://flagcdn.com/20x15/vn.png" alt="VI" style={{ width: '20px', height: '15px', marginRight: '6px' }} /> VI
 					</button>
 				</div>
 

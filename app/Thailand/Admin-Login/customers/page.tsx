@@ -2,8 +2,8 @@
 
 import React, { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
+import AdminLayout from '../components/AdminLayout'
 import styles from '../admin-theme.module.css'
-import poStyles from '../purchase-order.module.css'
 
 type Customer = {
   cusID: number,
@@ -18,92 +18,115 @@ type Customer = {
   created_at?: string | null
 }
 
-export default function Page(){
+export default function CustomersPage() {
   const router = useRouter()
-  const [customers,setCustomers] = useState<Customer[]>([])
-  const [locale, setLocale] = useState<'th'|'en'>(() => {
+  const [customers, setCustomers] = useState<Customer[]>([])
+  const [loading, setLoading] = useState(true)
+  const [locale, setLocale] = useState<'en' | 'th'>('en')
+
+  useEffect(() => {
     try {
-      const l = localStorage.getItem('locale')
-      return l === 'en' ? 'en' : 'th'
-    } catch (e) {
-      return 'th'
+      const l = localStorage.getItem('locale') || localStorage.getItem('k_system_lang')
+      if (l === 'th') setLocale('th')
+    } catch {}
+
+    const handler = (e: Event) => {
+      const d = (e as any).detail
+      const v = typeof d === 'string' ? d : d?.locale
+      if (v === 'en' || v === 'th') setLocale(v)
     }
-  })
+    window.addEventListener('k-system-lang', handler)
+    window.addEventListener('locale-changed', handler)
+    return () => {
+      window.removeEventListener('k-system-lang', handler)
+      window.removeEventListener('locale-changed', handler)
+    }
+  }, [])
 
-  // Toggle language and persist
-  function toggleLocale() {
-    const next = locale === 'th' ? 'en' : 'th'
-    setLocale(next)
-    try { localStorage.setItem('locale', next) } catch (e) {}
-    // broadcast change for other components if needed
-    try { window.dispatchEvent(new CustomEvent('locale-changed', { detail: { locale: next } })) } catch (e) {}
-  }
-
-  // Fetch customers from API on mount
   useEffect(() => {
     let mounted = true
     ;(async () => {
       try {
         const res = await fetch('/api/customers')
         const j = await res.json()
-        if (mounted && j && Array.isArray(j.customers)) setCustomers(j.customers)
+        if (mounted && j && Array.isArray(j.customers)) {
+          setCustomers(j.customers)
+        }
       } catch (err) {
         console.error('Failed to load customers', err)
+      } finally {
+        if (mounted) setLoading(false)
       }
     })()
     return () => { mounted = false }
   }, [])
 
-  const inlineStyles={container:{padding:24,fontFamily:'Inter,system-ui,Arial',maxWidth:1200,margin:'auto'},table:{width:'100%',borderCollapse:'collapse'}} as const
+  const L = (en: string, th: string) => locale === 'th' ? th : en
 
   return (
-    <div style={styles.container}>
-      <div style={{display:'flex',justifyContent:'space-between',alignItems:'center'}}>
-        <h2 className={styles.pageTitle}>{locale === 'th' ? 'รายละเอียดลูกค้า' : 'Customer Details'}</h2>
-        <div style={{display:'flex',gap:8,alignItems:'center'}}>
-          <button className={styles.btnLocale} onClick={toggleLocale}>{locale === 'th' ? 'TH' : 'EN'}</button>
-          <button className={styles.btnBack} onClick={()=>router.back()}>{locale === 'th' ? 'ย้อนกลับ' : 'Back'}</button>
+    <AdminLayout title="Customer Details" titleTh="รายละเอียดลูกค้า">
+      <div className={styles.contentCard}>
+        <div className={styles.cardHeader}>
+          <h2 className={styles.cardTitle}>
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" style={{ marginRight: 12 }}>
+              <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
+              <circle cx="9" cy="7" r="4"/>
+              <path d="M23 21v-2a4 4 0 0 0-3-3.87"/>
+              <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+            </svg>
+            {L('Customer Details', 'รายละเอียดลูกค้า')}
+          </h2>
+          <p className={styles.cardSubtitle}>
+            {L('View all registered customers', 'ดูข้อมูลลูกค้าทั้งหมดที่ลงทะเบียนไว้')}
+          </p>
+        </div>
+        <div className={styles.cardBody}>
+          {loading ? (
+            <div style={{ textAlign: 'center', padding: 40, color: '#6b7280' }}>
+              {L('Loading...', 'กำลังโหลด...')}
+            </div>
+          ) : customers.length === 0 ? (
+            <div style={{ textAlign: 'center', padding: 40, color: '#6b7280' }}>
+              {L('No customers yet', 'ยังไม่มีลูกค้า')}
+            </div>
+          ) : (
+            <div style={{ overflowX: 'auto' }}>
+              <table className={styles.table}>
+                <thead>
+                  <tr>
+                    <th>{L('ID', 'รหัส')}</th>
+                    <th>{L('Full Name', 'ชื่อ-นามสกุล')}</th>
+                    <th>{L('Email', 'อีเมล')}</th>
+                    <th>{L('Phone', 'โทรศัพท์')}</th>
+                    <th>{L('Company', 'บริษัท')}</th>
+                    <th>{L('Address', 'ที่อยู่')}</th>
+                    <th>{L('Subject', 'หัวข้อ')}</th>
+                    <th>{L('Message', 'ข้อความ')}</th>
+                    <th>{L('Created By', 'สร้างโดย')}</th>
+                    <th>{L('Created At', 'วันที่สร้าง')}</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {customers.map(c => (
+                    <tr key={c.cusID}>
+                      <td>{c.cusID}</td>
+                      <td>{c.fullname}</td>
+                      <td>{c.email || '-'}</td>
+                      <td>{c.phone || '-'}</td>
+                      <td>{c.company || '-'}</td>
+                      <td style={{ maxWidth: 200, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{c.address || '-'}</td>
+                      <td>{c.subject || '-'}</td>
+                      <td style={{ maxWidth: 200, whiteSpace: 'pre-wrap' }}>{c.message || '-'}</td>
+                      <td>{c.created_by || '-'}</td>
+                      <td>{c.created_at || '-'}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
         </div>
       </div>
-
-      <div style={{marginTop:12}}>
-        {customers.length===0? <div style={{color:'#6b7280'}}>ยังไม่มีลูกค้า / No customers yet</div> : (
-          <div className={poStyles.tableWrapper}>
-            <table className={poStyles.poTable}>
-            <thead>
-              <tr style={{textAlign:'left'}}>
-                <th>{locale === 'th' ? 'รหัส' : 'cusID'}</th>
-                <th>{locale === 'th' ? 'ชื่อ-นามสกุล' : 'fullname'}</th>
-                <th>{locale === 'th' ? 'อีเมล' : 'email'}</th>
-                <th>{locale === 'th' ? 'โทรศัพท์' : 'phone'}</th>
-                <th>{locale === 'th' ? 'บริษัท' : 'company'}</th>
-                <th>{locale === 'th' ? 'ที่อยู่' : 'address'}</th>
-                <th>{locale === 'th' ? 'หัวข้อ' : 'subject'}</th>
-                <th>{locale === 'th' ? 'ข้อความ' : 'message'}</th>
-                <th>{locale === 'th' ? 'สร้างโดย' : 'created_by'}</th>
-                <th>{locale === 'th' ? 'วันที่สร้าง' : 'created_at'}</th>
-              </tr>
-            </thead>
-              <tbody>
-                {customers.map(c=> (
-                  <tr key={c.cusID}>
-                    <td>{c.cusID}</td>
-                    <td>{c.fullname}</td>
-                    <td>{c.email}</td>
-                    <td>{c.phone}</td>
-                    <td>{c.company}</td>
-                    <td>{c.address}</td>
-                    <td>{c.subject}</td>
-                    <td style={{whiteSpace:'pre-wrap'}}>{c.message}</td>
-                    <td>{c.created_by}</td>
-                    <td>{c.created_at}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        )}
-      </div>
-    </div>
+    </AdminLayout>
   )
 }
