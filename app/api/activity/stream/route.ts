@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server'
 import { pool } from '@/lib/mysql'
 
 export const runtime = 'nodejs'
+export const dynamic = 'force-dynamic'
 
 function formatRow(r: any) {
   return {
@@ -20,27 +21,30 @@ export async function GET() {
       let lastTs: string | null = null
 
       // initialize lastTs to latest activity timestamp to avoid flooding
-      try {
-        const conn = await pool.getConnection()
-        try {
-          const [rows]: any = await conn.query(`
-            SELECT created_at AS ts FROM (
-              SELECT created_at FROM purchase_orders
-              UNION ALL
-              SELECT created_at FROM cus_detail
-              UNION ALL
-              SELECT created_at FROM invoices
-            ) x ORDER BY ts DESC LIMIT 1
-          `)
-          if (Array.isArray(rows) && rows.length) lastTs = rows[0].ts
-        } catch (e) {
-          console.error('init lastTs error', e)
-        } finally {
-          conn.release()
-        }
-      } catch (e) {
-        console.error('pool getConnection error', e)
-      }
+        // initialize lastTs asynchronously so start() returns immediately
+        ;(async () => {
+          try {
+            const conn = await pool.getConnection()
+            try {
+              const [rows]: any = await conn.query(`
+   SELECT created_at AS ts FROM (
+     SELECT created_at FROM purchase_orders
+     UNION ALL
+     SELECT created_at FROM cus_detail
+     UNION ALL
+     SELECT created_at FROM invoices
+   ) x ORDER BY ts DESC LIMIT 1
+ `)
+              if (Array.isArray(rows) && rows.length) lastTs = rows[0].ts
+            } catch (e) {
+              console.error('init lastTs error', e)
+            } finally {
+              conn.release()
+            }
+          } catch (e) {
+            console.error('pool getConnection error', e)
+          }
+        })().catch(e => console.error('init lastTs async error', e))
 
       const poll = async () => {
         try {
@@ -84,16 +88,22 @@ export async function GET() {
       // poll every 3 seconds
       const interval = setInterval(poll, 3000)
 
-      // run initial poll once
-      await poll()
+        // run initial poll asynchronously (do not await) so start returns quickly
+        poll().catch(e => console.error('activity stream initial poll error', e))
 
       controller.enqueue(encoder.encode(`data: ${JSON.stringify({ ready: true })}\n\n`))
 
-      controller.signal.addEventListener('abort', () => {
-        clearInterval(interval)
-        clearInterval(pingInterval)
-        controller.close()
-      })
+      if (controller && controller.signal && typeof controller.signal.addEventListener === 'function') {
+        controller.signal.addEventListener('abort', () => {
+          clearInterval(interval)
+          clearInterval(pingInterval)
+          try {
+            controller.close()
+          } catch (_) {
+            // ignore
+          }
+        })
+      }
     }
   })
 

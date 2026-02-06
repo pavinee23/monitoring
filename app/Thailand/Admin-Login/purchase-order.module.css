@@ -1,0 +1,5 @@
+.poContainer { padding: 16px }
+.poHeader { display:flex; align-items:center; gap:12px }
+.poTable { width:100%; border-collapse:collapse }
+.poTable th, .poTable td { border:1px solid #e5e7eb; padding:8px }
+.poActions { margin-top:12px }

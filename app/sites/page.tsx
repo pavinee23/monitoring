@@ -147,48 +147,48 @@ function MachineCard({ m, services, selectedSiteFilter }: { m: Machine; services
   }, [m.id, m.ksave, seriesNo])
 
   return (
-    <div className="card crisp-text machine-card" style={{ minWidth: 340, maxWidth: 520, flex: '0 0 auto', marginRight: 12, marginBottom: 12, padding: 16 }}>
+    <div className="card crisp-text machine-card" style={{ minWidth: 340, maxWidth: 520, flex: '0 0 auto', marginRight: 12, marginBottom: 12, padding: 20, background: 'rgba(255, 255, 255, 0.95)', borderRadius: '16px', boxShadow: '0 8px 24px rgba(0, 0, 0, 0.1)', border: '1px solid rgba(59, 130, 246, 0.1)' }}>
       <div className="machine-card-header">
         <div>
-          <div className="machine-name">{m.name}</div>
-          <div className="machine-sub" title={deviceLocation ? 'Value from InfluxDB' : (m.location ? 'Value from machine metadata' : (selectedSiteFilter && selectedSiteFilter !== 'All' ? 'Site from current filter' : 'No site tag in InfluxDB'))}>
-            Site: {deviceLocation ?? m.location ?? (selectedSiteFilter && selectedSiteFilter !== 'All' ? selectedSiteFilter : '—')}
+          <div className="machine-name" style={{ fontSize: 20, fontWeight: 700, color: '#1e293b' }}>{m.name}</div>
+          <div className="machine-sub" style={{ fontSize: 14, color: '#64748b', marginTop: 8 }} title={deviceLocation ? 'Value from InfluxDB' : (m.location ? 'Value from machine metadata' : (selectedSiteFilter && selectedSiteFilter !== 'All' ? 'Site from current filter' : 'No site tag in InfluxDB'))}>
+            📍 Site: {deviceLocation ?? m.location ?? (selectedSiteFilter && selectedSiteFilter !== 'All' ? selectedSiteFilter : '—')}
           </div>
-          <div className="machine-sub" style={{ marginTop: 6 }}>{isMounted && now ? now.toLocaleString() : '—'}</div>
-          <div className="machine-sub">
-            IP: {m.ipAddress || (m.ksave ? `${m.ksave.toLowerCase()}.local` : '—')}
+          <div className="machine-sub" style={{ marginTop: 6, fontSize: 14, color: '#64748b' }}>🕐 {isMounted && now ? now.toLocaleString() : '—'}</div>
+          <div className="machine-sub" style={{ fontSize: 14, color: '#64748b' }}>
+            🌐 IP: {m.ipAddress || (m.ksave ? `${m.ksave.toLowerCase()}.local` : '—')}
           </div>
-          <div className="machine-sub">
-            Before Meter No: {m.beforeMeterNo ?? '—'}
+          <div className="machine-sub" style={{ fontSize: 14, color: '#64748b' }}>
+            ⚡ Before Meter No: {m.beforeMeterNo ?? '—'}
           </div>
-          <div className="machine-sub">
-            Metrics Meter No: {m.metricsMeterNo ?? '—'}
+          <div className="machine-sub" style={{ fontSize: 14, color: '#64748b' }}>
+            📊 Metrics Meter No: {m.metricsMeterNo ?? '—'}
           </div>
-          <div className="machine-sub">
-            Phone: {m.phone ?? '—'}
+          <div className="machine-sub" style={{ fontSize: 14, color: '#64748b' }}>
+            📞 Phone: {m.phone ?? '—'}
           </div>
         </div>
 
-        <div className={"status-pill " + (m.status === 'OK' ? 'ok' : (m.status === 'Warning' ? 'warn' : ''))}>
-          {m.status === 'OK' ? 'ON' : m.status === 'Warning' ? 'OFF' : ''}
+        <div className={"status-pill " + (deviceReportingOk === true ? 'ok' : 'warn')} style={{ padding: '8px 16px', borderRadius: '12px', fontWeight: 700, fontSize: 14, background: deviceReportingOk === true ? 'linear-gradient(135deg, #10b981, #059669)' : 'linear-gradient(135deg, #f59e0b, #d97706)', color: '#fff', boxShadow: '0 4px 12px rgba(0, 0, 0, 0.15)' }}>
+          {deviceReportingOk === true ? 'ON' : 'OFF'}
         </div>
       </div>
 
-      <div className="machine-info-row">
-        <div className="machine-info">
-          <div className="label">K-Save ID:</div>
-          <div className="value">{(seriesName ?? m.ksave ?? m.name) ?? ''}</div>
+      <div className="machine-info-row" style={{ display: 'flex', gap: 16, marginTop: 16, padding: '16px', background: 'linear-gradient(135deg, #eff6ff, #dbeafe)', borderRadius: '12px', border: '1px solid rgba(59, 130, 246, 0.2)' }}>
+        <div className="machine-info" style={{ flex: 1 }}>
+          <div className="label" style={{ fontSize: 13, fontWeight: 600, color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.5px' }}>K-Save ID:</div>
+          <div className="value" style={{ fontSize: 16, fontWeight: 700, color: '#1e293b', marginTop: 4 }}>{(seriesName ?? m.ksave ?? m.name) ?? ''}</div>
         </div>
-        <div className="machine-info">
-          <div className="label">Series no:</div>
-          <div className="value">{(seriesNo ?? localSeriesNo) ?? ''}</div>
+        <div className="machine-info" style={{ flex: 1 }}>
+          <div className="label" style={{ fontSize: 13, fontWeight: 600, color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Series no:</div>
+          <div className="value" style={{ fontSize: 16, fontWeight: 700, color: '#1e293b', marginTop: 4 }}>{(seriesNo ?? localSeriesNo) ?? ''}</div>
         </div>
       </div>
 
-  <div className="machine-actions" style={{ display: 'flex', gap: 8, flexWrap: 'wrap', alignItems: 'center' }}>
+  <div className="machine-actions" style={{ display: 'flex', gap: 10, flexWrap: 'wrap', alignItems: 'center', marginTop: 16 }}>
         <button
           className="k-btn k-btn-ghost machine-action-btn"
-          style={{ flex: '0 0 auto', padding: '8px 16px', fontSize: 16, width: 'auto', minWidth: 0, whiteSpace: 'nowrap', fontWeight: 600 }}
+          style={{ flex: '0 0 auto', padding: '10px 20px', fontSize: 16, width: 'auto', minWidth: 0, whiteSpace: 'nowrap', fontWeight: 700, background: 'linear-gradient(135deg, #3b82f6, #2563eb)', color: '#fff', border: 'none', borderRadius: '10px', boxShadow: '0 4px 12px rgba(59, 130, 246, 0.3)', transition: 'all 0.3s ease' }}
           onClick={() => {
             const deviceId = (m.ksave || m.id || '').toUpperCase()
 
@@ -205,35 +205,35 @@ function MachineCard({ m, services, selectedSiteFilter }: { m: Machine; services
         </button>
         <button
           className="k-btn k-btn-ghost machine-action-btn small"
-          style={{ padding: '6px 10px', fontSize: 16, width: 'auto', minWidth: 0, whiteSpace: 'nowrap' }}
+          style={{ padding: '8px 16px', fontSize: 15, width: 'auto', minWidth: 0, whiteSpace: 'nowrap', fontWeight: 600, background: 'linear-gradient(135deg, #8b5cf6, #7c3aed)', color: '#fff', border: 'none', borderRadius: '10px', boxShadow: '0 4px 12px rgba(139, 92, 246, 0.3)' }}
           onClick={() => {
             const deviceId = m.ksave || m.id || ''
             router.push(`/reports?device=${encodeURIComponent(deviceId)}`)
           }}
         >
-          Report Carbon
+          📄 Report Carbon
         </button>
         <button
           className="k-btn k-btn-ghost machine-action-btn small"
-          style={{ padding: '6px 10px', fontSize: 16, width: 'auto', minWidth: 0, whiteSpace: 'nowrap' }}
+          style={{ padding: '8px 16px', fontSize: 15, width: 'auto', minWidth: 0, whiteSpace: 'nowrap', fontWeight: 600, background: 'linear-gradient(135deg, #ec4899, #db2777)', color: '#fff', border: 'none', borderRadius: '10px', boxShadow: '0 4px 12px rgba(236, 72, 153, 0.3)' }}
           onClick={() => {
             const id = m.ksave || m.id || ''
             // navigate to analytics page and pass device id as query param
             router.push(`/analytics/exprolore?device=${encodeURIComponent(id)}`)
           }}
         >
-          Peak Analysis
+          📈 Peak Analysis
         </button>
       </div>
 
-      <div style={{ display: 'flex', gap: 12, marginTop: 10, alignItems: 'center' }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }} title={deviceSecondsAgo != null ? `Last point ${deviceSecondsAgo} seconds ago` : (deviceReportingOk === true ? 'Connected' : 'Disconnected')}>
-          <div style={{ width: 10, height: 10, borderRadius: 6, background: deviceReportingOk === true ? '#10B981' : '#EF4444' }} />
-          <div style={{ fontSize: 16, color: '#374151' }}>Telegraf</div>
+      <div style={{ display: 'flex', gap: 16, marginTop: 16, padding: '12px', background: 'rgba(248, 250, 252, 0.8)', borderRadius: '10px', alignItems: 'center' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '6px 12px', borderRadius: '8px', background: deviceReportingOk === true ? 'rgba(16, 185, 129, 0.1)' : 'rgba(239, 68, 68, 0.1)' }} title={deviceSecondsAgo != null ? `Last point ${deviceSecondsAgo} seconds ago` : (deviceReportingOk === true ? 'Connected' : 'Disconnected')}>
+          <div style={{ width: 12, height: 12, borderRadius: '50%', background: deviceReportingOk === true ? '#10B981' : '#EF4444', boxShadow: deviceReportingOk === true ? '0 0 8px rgba(16, 185, 129, 0.5)' : '0 0 8px rgba(239, 68, 68, 0.5)' }} />
+          <div style={{ fontSize: 14, fontWeight: 600, color: deviceReportingOk === true ? '#059669' : '#dc2626' }}>Telegraf</div>
         </div>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }} title={deviceSecondsAgo != null ? `Last point ${deviceSecondsAgo} seconds ago` : (deviceReportingOk === true ? 'Connected' : 'Disconnected')}>
-          <div style={{ width: 10, height: 10, borderRadius: 6, background: deviceReportingOk === true ? '#10B981' : '#EF4444' }} />
-          <div style={{ fontSize: 16, color: '#374151' }}>Grafana</div>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '6px 12px', borderRadius: '8px', background: deviceReportingOk === true ? 'rgba(16, 185, 129, 0.1)' : 'rgba(239, 68, 68, 0.1)' }} title={deviceSecondsAgo != null ? `Last point ${deviceSecondsAgo} seconds ago` : (deviceReportingOk === true ? 'Connected' : 'Disconnected')}>
+          <div style={{ width: 12, height: 12, borderRadius: '50%', background: deviceReportingOk === true ? '#10B981' : '#EF4444', boxShadow: deviceReportingOk === true ? '0 0 8px rgba(16, 185, 129, 0.5)' : '0 0 8px rgba(239, 68, 68, 0.5)' }} />
+          <div style={{ fontSize: 14, fontWeight: 600, color: deviceReportingOk === true ? '#059669' : '#dc2626' }}>Grafana</div>
         </div>
       </div>
     </div>
@@ -242,12 +242,12 @@ function MachineCard({ m, services, selectedSiteFilter }: { m: Machine; services
 
 function ServiceCard({ name, status, info }: { name: string; status?: boolean; info?: any }) {
   // show only green (ok) or red (not ok). undefined is treated as not ok (red).
-  const color = status ? '#10B981' : '#EF4444'
+  const bgGradient = status ? 'linear-gradient(135deg, #10B981, #059669)' : 'linear-gradient(135deg, #EF4444, #DC2626)'
   const label = status ? 'Connected' : 'Disconnected'
   return (
-    <div className="card service-card crisp-text" title={info ? JSON.stringify(info) : undefined} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', padding: 8, borderRadius: 8, background: '#fff', border: '1px solid #e5e7eb', position: 'relative' }}>
-      <div style={{ fontSize: 14, color: '#374151', fontWeight: 700 }}>{name}</div>
-      <div style={{ marginTop: 6, padding: '4px 8px', borderRadius: 6, background: color, color: '#fff', fontSize: 14 }}>{label}</div>
+    <div className="card service-card crisp-text" title={info ? JSON.stringify(info) : undefined} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', padding: 12, borderRadius: 12, background: 'rgba(255, 255, 255, 0.95)', border: `2px solid ${status ? 'rgba(16, 185, 129, 0.3)' : 'rgba(239, 68, 68, 0.3)'}`, position: 'relative', boxShadow: '0 4px 12px rgba(0, 0, 0, 0.08)', minWidth: 100 }}>
+      <div style={{ fontSize: 14, color: '#1e293b', fontWeight: 700 }}>{name}</div>
+      <div style={{ marginTop: 8, padding: '6px 12px', borderRadius: 8, background: bgGradient, color: '#fff', fontSize: 13, fontWeight: 600, boxShadow: '0 2px 8px rgba(0, 0, 0, 0.15)' }}>{label}</div>
     </div>
   )
 }
@@ -393,11 +393,11 @@ export default function SitesPage() {
   }
 
   return (
-    <div className="page-shell" style={{ padding: 20, background: '#f3f4f6', minHeight: '100vh' }}>
-      <header style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 18 }}>
+    <div className="page-shell" style={{ padding: 20, background: 'linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%)', minHeight: '100vh' }}>
+      <header style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 24, background: 'rgba(255, 255, 255, 0.9)', padding: '20px 24px', borderRadius: '16px', boxShadow: '0 4px 20px rgba(0, 0, 0, 0.08)' }}>
         <div>
-          <h2 style={{ margin: 0 }}>K System Energy - Monitoring</h2>
-          <div style={{ fontSize: 15, color: '#6b7280' }}>Devices and monitoring overview</div>
+          <h2 style={{ margin: 0, fontSize: 28, fontWeight: 700, background: 'linear-gradient(135deg, #2563eb, #1d4ed8)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>K System Energy - Monitoring</h2>
+          <div style={{ fontSize: 16, color: '#64748b', marginTop: 4 }}>Devices and monitoring overview</div>
         </div>
 
         <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
@@ -407,6 +407,22 @@ export default function SitesPage() {
             <ServiceCard name="Telegraf" status={services?.telegraf?.ok} />
             <ServiceCard name="MQTT" status={services?.mqtt?.ok} />
           </div>
+          <button
+            className="k-btn k-btn-primary crisp-text"
+            onClick={() => window.open('https://connect.momohub.net/app-main.php', '_blank')}
+            style={{
+              background: 'linear-gradient(135deg, #10b981, #059669)',
+              color: '#fff',
+              padding: '12px 24px',
+              borderRadius: 8,
+              border: 0,
+              fontSize: 18,
+              fontWeight: 600,
+              boxShadow: '0 4px 12px rgba(16, 185, 129, 0.4)'
+            }}
+          >
+            K-save (Devices Running)
+          </button>
           <button
             className="k-btn k-btn-primary crisp-text"
             onClick={handleOpenAllBefore}
@@ -421,31 +437,31 @@ export default function SitesPage() {
               boxShadow: '0 4px 12px rgba(37, 99, 235, 0.4)'
             }}
           >
-            📊 Compare Monitoring
+            📊 Compare
           </button>
 
         </div>
       </header>
 
-      <section style={{ marginBottom: 12 }}>
-        <div style={{ marginBottom: 12, display: 'flex', gap: 12, alignItems: 'center' }}>
-          <label style={{ fontSize: 17 }}>Site:</label>
-          <select value={locationFilter} onChange={(e) => setLocationFilter(e.target.value)} style={{ padding: 10, borderRadius: 6, fontSize: 17 }}>
+      <section style={{ marginBottom: 20 }}>
+        <div style={{ marginBottom: 20, display: 'flex', gap: 16, alignItems: 'center', background: 'rgba(255, 255, 255, 0.9)', padding: '20px', borderRadius: '16px', boxShadow: '0 4px 20px rgba(0, 0, 0, 0.08)' }}>
+          <label style={{ fontSize: 16, fontWeight: 700, color: '#1e293b' }}>📍 Site:</label>
+          <select value={locationFilter} onChange={(e) => setLocationFilter(e.target.value)} style={{ padding: '10px 16px', borderRadius: 10, fontSize: 16, fontWeight: 600, border: '2px solid #e2e8f0', background: '#fff', color: '#1e293b', cursor: 'pointer', outline: 'none', boxShadow: '0 2px 8px rgba(0, 0, 0, 0.05)' }}>
             <option value="All">All</option>
             {(locationsFromInflux && locationsFromInflux.length > 0 ? locationsFromInflux : locations).map((loc) => (
               <option key={loc} value={loc}>{loc}</option>
             ))}
           </select>
 
-          <label style={{ fontSize: 17 }}>Status:</label>
-          <select value={statusFilter} onChange={(e) => setStatusFilter(e.target.value)} style={{ padding: 10, borderRadius: 6, fontSize: 17 }}>
+          <label style={{ fontSize: 16, fontWeight: 700, color: '#1e293b' }}>⚡ Status:</label>
+          <select value={statusFilter} onChange={(e) => setStatusFilter(e.target.value)} style={{ padding: '10px 16px', borderRadius: 10, fontSize: 16, fontWeight: 600, border: '2px solid #e2e8f0', background: '#fff', color: '#1e293b', cursor: 'pointer', outline: 'none', boxShadow: '0 2px 8px rgba(0, 0, 0, 0.05)' }}>
             <option value="All">All</option>
             <option value="ON">ON</option>
             <option value="OFF">OFF</option>
           </select>
 
-          <label style={{ fontSize: 17 }}>Sort:</label>
-          <select value={sortMode} onChange={(e) => setSortMode(e.target.value)} style={{ padding: 10, borderRadius: 6, fontSize: 17 }}>
+          <label style={{ fontSize: 16, fontWeight: 700, color: '#1e293b' }}>🔄 Sort:</label>
+          <select value={sortMode} onChange={(e) => setSortMode(e.target.value)} style={{ padding: '10px 16px', borderRadius: 10, fontSize: 16, fontWeight: 600, border: '2px solid #e2e8f0', background: '#fff', color: '#1e293b', cursor: 'pointer', outline: 'none', boxShadow: '0 2px 8px rgba(0, 0, 0, 0.05)' }}>
             <option value="efficiency_desc">Efficiency: High → Low</option>
             <option value="power_asc">Power: Low → High</option>
             <option value="power_desc">Power: High → Low</option>

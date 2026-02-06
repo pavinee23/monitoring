@@ -14,10 +14,10 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: 'Missing username or password' }, { status: 400 })
     }
 
-    // Check username/password from MySQL database table 'users'
+    // Check username/password from MySQL database table 'user_list'
     try {
       const users = await query(
-        'SELECT id, username, password, full_name FROM users WHERE username = ? LIMIT 1',
+        'SELECT userId, userName, password, name, email, site, typeID FROM user_list WHERE userName = ? LIMIT 1',
         [username]
       ) as any[]
 
@@ -28,19 +28,21 @@ export async function POST(req: Request) {
       const user = users[0]
 
       // Check password (currently storing as plain - should use bcrypt in production)
-      // WARNING: Storing passwords as plain text is NOT secure for production!
       if (password !== user.password) {
         return NextResponse.json({ error: 'Invalid username or password' }, { status: 401 })
       }
 
       // Login successful - create token
-      const token = `user-token-${user.id}-${Date.now()}`
+      const token = `user-token-${user.userId}-${Date.now()}`
 
       return NextResponse.json({
         token,
-        username: user.username,
-        userId: user.id,
-        fullName: user.full_name
+        username: user.userName,
+        userId: user.userId,
+        name: user.name,
+        email: user.email,
+        site: user.site,
+        typeID: user.typeID
       })
 
     } catch (dbError: any) {

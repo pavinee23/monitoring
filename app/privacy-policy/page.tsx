@@ -5,23 +5,22 @@ import { useRouter } from 'next/navigation'
 
 export default function PrivacyPolicyPage() {
 	const router = useRouter()
-	const [language, setLanguage] = useState<'en' | 'th' | 'ko' | 'zh'>('en')
+	const [language, setLanguage] = useState<'en' | 'th' | 'ko' | 'zh' | 'vi'>('en')
 
 	// Easter Egg state for admin login button
 	const [showAdminButton, setShowAdminButton] = useState(false)
+	const [logoClickCount, setLogoClickCount] = useState(0)
 
-	// Easter Egg: Ctrl+Alt+L to show admin login button
-	React.useEffect(() => {
-		const handleKeyPress = (e: KeyboardEvent) => {
-			if (e.ctrlKey && e.altKey && e.key.toLowerCase() === 'l') {
-				e.preventDefault()
-				setShowAdminButton(prev => !prev)
-			}
+	// Easter Egg: Click logo 5 times to show admin login button
+	const handleLogoClick = () => {
+		const newCount = logoClickCount + 1
+		setLogoClickCount(newCount)
+
+		if (newCount >= 5) {
+			setShowAdminButton(true)
+			setLogoClickCount(0) // Reset counter
 		}
-
-		window.addEventListener('keydown', handleKeyPress)
-		return () => window.removeEventListener('keydown', handleKeyPress)
-	}, [])
+	}
 
 	const translations = {
 		en: {
@@ -331,6 +330,83 @@ export default function PrivacyPolicyPage() {
 			dataRetentionText: '我们仅在必要的时间内保留您的个人信息，以实现本隐私政策中概述的目的，除非法律要求或允许更长的保留期限。',
 			backButton: '返回首页',
 			adminLogin: '管理员登录'
+		},
+		vi: {
+			title: 'Chính sách bảo mật',
+			lastUpdated: 'Cập nhật lần cuối: 13 Tháng 1, 2026',
+			introduction: 'Giới thiệu',
+			introText: 'Công ty K Energy Save Co., Ltd. ("chúng tôi") cam kết bảo vệ quyền riêng tư của bạn. Chính sách này giải thích cách chúng tôi thu thập, sử dụng, tiết lộ và bảo vệ thông tin khi bạn truy cập trang web của chúng tôi hoặc sử dụng dịch vụ.',
+			informationWeCollect: 'Thông tin chúng tôi thu thập',
+			personalInfo: 'Thông tin cá nhân',
+			personalInfoText: 'Chúng tôi có thể thu thập thông tin cá nhân mà bạn cung cấp khi bạn:',
+			personalInfoList: [
+				'Điền biểu mẫu liên hệ (tên, email, số điện thoại, tên công ty)',
+				'Yêu cầu báo giá hoặc thông tin sản phẩm',
+				'Đăng ký nhận bản tin hoặc thông báo',
+				'Liên hệ hỗ trợ kỹ thuật',
+				'Thực hiện khảo sát hoặc khuyến mãi'
+			],
+			automaticInfo: 'Thông tin thu thập tự động',
+			automaticInfoText: 'Khi bạn truy cập trang web, chúng tôi có thể tự động thu thập những thông tin sau về thiết bị của bạn:',
+			automaticInfoList: [
+				'Địa chỉ IP và loại trình duyệt',
+				'Hệ điều hành và thông tin thiết bị',
+				'Các trang đã truy cập và thời gian truy cập',
+				'Địa chỉ trang web giới thiệu',
+				'Cookie và công nghệ theo dõi tương tự'
+			],
+			howWeUse: 'Cách chúng tôi sử dụng thông tin',
+			howWeUseText: 'Chúng tôi sử dụng thông tin để:',
+			howWeUseList: [
+				'Phản hồi yêu cầu và cung cấp hỗ trợ khách hàng',
+				'Xử lý yêu cầu báo giá và quan hệ đối tác',
+				'Gửi thông tin sản phẩm và tài liệu quảng cáo (khi có sự đồng ý)',
+				'Cải thiện trang web và dịch vụ',
+				'Phân tích hành vi sử dụng và tối ưu trải nghiệm',
+				'Tuân thủ nghĩa vụ pháp lý và phòng chống gian lận'
+			],
+			informationSharing: 'Chia sẻ và tiết lộ thông tin',
+			informationSharingText: 'Chúng tôi không bán, trao đổi hoặc cho thuê thông tin cá nhân của bạn cho bên thứ ba. Chúng tôi chỉ có thể chia sẻ thông tin trong các trường hợp sau:',
+			informationSharingList: [
+				'Với nhà cung cấp dịch vụ hỗ trợ vận hành trang web và kinh doanh',
+				'Khi pháp luật yêu cầu hoặc để bảo vệ quyền lợi và an toàn của chúng tôi',
+				'Khi có sự đồng ý rõ ràng của bạn',
+				'Trong trường hợp chuyển nhượng hoặc sáp nhập doanh nghiệp'
+			],
+			dataSecurity: 'Bảo mật dữ liệu',
+			dataSecurityText: 'Chúng tôi thực hiện các biện pháp kỹ thuật và tổ chức phù hợp để bảo vệ thông tin cá nhân của bạn khỏi truy cập, sửa đổi, tiết lộ hoặc phá hủy trái phép. Tuy nhiên, không có phương thức truyền tải qua Internet nào là an toàn 100%.',
+			cookies: 'Cookie và công nghệ theo dõi',
+			cookiesText: 'Chúng tôi sử dụng cookie và các công nghệ theo dõi để nâng cao trải nghiệm trên trang web. Bạn có thể điều chỉnh cài đặt cookie qua trình duyệt.',
+			yourRights: 'Quyền của bạn',
+			yourRightsText: 'Tùy theo nơi bạn cư trú, bạn có thể có các quyền sau:',
+			yourRightsList: [
+				'Truy cập thông tin cá nhân của bạn',
+				'Sửa thông tin không chính xác',
+				'Yêu cầu xóa thông tin cá nhân',
+				'Phản đối việc xử lý thông tin',
+				'Di chuyển dữ liệu',
+				'Rút lại sự đồng ý'
+			],
+			thirdPartyLinks: 'Liên kết bên thứ ba',
+			thirdPartyLinksText: 'Trang web của chúng tôi có thể chứa liên kết đến các trang web bên thứ ba. Chúng tôi không chịu trách nhiệm cho các chính sách bảo mật của các trang đó. Vui lòng đọc chính sách của họ.',
+			childrenPrivacy: 'Quyền riêng tư của trẻ em',
+			childrenPrivacyText: 'Dịch vụ của chúng tôi không dành cho người dưới 18 tuổi. Chúng tôi không cố ý thu thập thông tin cá nhân của trẻ em.',
+			international: 'Chuyển giao dữ liệu quốc tế',
+			internationalText: 'Thông tin của bạn có thể được chuyển và xử lý tại các quốc gia ngoài nơi bạn cư trú. Chúng tôi đảm bảo có biện pháp bảo vệ thích hợp cho các chuyển giao đó.',
+			changes: 'Thay đổi chính sách',
+			changesText: 'Chúng tôi có thể cập nhật Chính sách bảo mật này theo thời gian. Mọi thay đổi sẽ được thông báo bằng cách đăng phiên bản mới trên trang này cùng ngày cập nhật.',
+			contact: 'Liên hệ',
+			contactText: 'Nếu bạn có câu hỏi hoặc băn khoăn về Chính sách này, vui lòng liên hệ với chúng tôi:',
+			contactInfo: [
+				'Điện thoại: +82 31-427-1380',
+				'Email: info@kenergy-save.com / info@zera-energy.com',
+				'LINE Official: @534znjie',
+				'Giờ làm việc: Thứ Hai - Thứ Sáu 9:00 - 18:00'
+			],
+			dataRetention: 'Lưu trữ dữ liệu',
+			dataRetentionText: 'Chúng tôi chỉ lưu trữ thông tin cá nhân của bạn trong thời gian cần thiết để đạt được mục đích nêu trong Chính sách này, trừ khi pháp luật yêu cầu hoặc cho phép thời hạn lưu trữ dài hơn.',
+			backButton: 'Quay về trang chủ',
+			adminLogin: 'Đăng nhập quản trị'
 		}
 	}
 
@@ -410,12 +486,21 @@ export default function PrivacyPolicyPage() {
 					>
 						<img src="https://flagcdn.com/20x15/cn.png" alt="ZH" style={{ width: '20px', height: '15px', marginRight: '6px' }} /> ZH
 					</button>
+					<button
+						onClick={() => setLanguage('vi')}
+						style={{
+							...styles.langButton,
+							...(language === 'vi' ? styles.langButtonActive : {})
+						}}
+					>
+						<img src="https://flagcdn.com/20x15/vn.png" alt="VI" style={{ width: '20px', height: '15px', marginRight: '6px' }} /> VI
+					</button>
 				</div>
 
 				<div style={styles.card}>
 					{/* Header */}
 					<div style={styles.header}>
-						<div style={styles.logoCircle}>
+						<div style={styles.logoCircle} onClick={handleLogoClick}>
 							<img
 								src="/k-energy-save-logo.jpg"
 								alt="K Energy Save Logo"
@@ -710,7 +795,8 @@ const styles: { [k: string]: React.CSSProperties } = {
 		animation: 'float 3s ease-in-out infinite',
 		padding: 12,
 		overflow: 'hidden',
-		border: '2px solid rgba(16, 185, 129, 0.2)'
+		border: '2px solid rgba(16, 185, 129, 0.2)',
+		cursor: 'pointer'
 	},
 	logoImage: {
 		width: '100%',

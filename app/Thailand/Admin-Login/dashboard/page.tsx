@@ -85,7 +85,7 @@ export default function ThailandAdminDashboard() {
       href: '/Thailand/Admin-Login/sales-order/list',
       icon: (
         <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-          <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="12" y1="18" x2="12" y2="12"/><line x1="9" y1="15" x2="15" y2="15"/>
+          <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/>
         </svg>
       ),
       color: '#0d6efd'
@@ -320,217 +320,550 @@ export default function ThailandAdminDashboard() {
 
   return (
     <AdminLayout title="Dashboard" titleTh="แดชบอร์ด">
-      <div className={styles.contentCard} style={{ marginTop: '8px', marginBottom: '16px' }}>
-        <div className={styles.cardHeader}>
-          <h3 className={styles.cardTitle} style={{ fontSize: '16px' }}>
-            {L('Welcome,','ยินดีต้อนรับ,')} {user?.name || user?.fullname || user?.username || 'pavinee boknoi'}
-          </h3>
-        </div>
-        <div style={{ padding: '12px 16px 16px 16px', display: 'flex', gap: 8 }}>
-          <button onClick={() => router.push('/Thailand/Admin-Login/contract/list')} className={styles.btn}>
-            {L('Contracts', 'Contracts')}
-          </button>
+      {/* Welcome Card */}
+      <div style={{
+        background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+        borderRadius: '20px',
+        padding: '32px',
+        marginBottom: '24px',
+        boxShadow: '0 8px 32px rgba(102, 126, 234, 0.3)',
+        color: 'white',
+        position: 'relative',
+        overflow: 'hidden'
+      }}>
+        <div style={{
+          position: 'absolute',
+          top: -50,
+          right: -50,
+          width: 200,
+          height: 200,
+          background: 'rgba(255,255,255,0.1)',
+          borderRadius: '50%',
+          filter: 'blur(40px)'
+        }}></div>
+        <div style={{ position: 'relative', zIndex: 1 }}>
+          <h1 style={{
+            fontSize: '32px',
+            fontWeight: 700,
+            marginBottom: '8px',
+            textShadow: '0 2px 4px rgba(0,0,0,0.1)'
+          }}>
+            {L('Welcome back!','ยินดีต้อนรับกลับมา!')}
+          </h1>
+          <p style={{
+            fontSize: '18px',
+            opacity: 0.95,
+            marginBottom: '16px'
+          }}>
+            {user?.name || user?.fullname || user?.username || 'Admin User'}
+          </p>
+          <div style={{
+            display: 'inline-block',
+            background: 'rgba(255,255,255,0.2)',
+            backdropFilter: 'blur(10px)',
+            padding: '8px 16px',
+            borderRadius: '8px',
+            fontSize: '14px',
+            fontWeight: 600
+          }}>
+            📍 {user?.site || 'Thailand Site'}
+          </div>
         </div>
       </div>
 
       {/* Stats Grid */}
-      <div className={styles.statsGrid}>
-        <div className={styles.statCard}>
-          <div className={`${styles.statIcon} ${styles.statIconBlue}`}>
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-              <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/>
-            </svg>
+      <div style={{
+        display: 'grid',
+        gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))',
+        gap: '20px',
+        marginBottom: '32px'
+      }}>
+        <div style={{
+          background: 'linear-gradient(135deg, #3b82f6, #2563eb)',
+          borderRadius: '16px',
+          padding: '24px',
+          color: 'white',
+          boxShadow: '0 8px 24px rgba(59, 130, 246, 0.3)',
+          transition: 'transform 0.3s ease',
+          cursor: 'pointer'
+        }}
+        onMouseEnter={(e) => e.currentTarget.style.transform = 'translateY(-4px)'}
+        onMouseLeave={(e) => e.currentTarget.style.transform = 'translateY(0)'}
+        onClick={() => router.push('/Thailand/Admin-Login/purchase-order/list')}>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '16px' }}>
+            <div style={{
+              width: 56,
+              height: 56,
+              borderRadius: '12px',
+              background: 'rgba(255,255,255,0.2)',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center'
+            }}>
+              <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/>
+              </svg>
+            </div>
           </div>
-          <div className={styles.statContent}>
-            <div className={styles.statValue}>{stats.orders}</div>
-            <div className={styles.statLabel}>{L('Purchase Orders','ใบสั่งซื้อ')}</div>
-          </div>
+          <div style={{ fontSize: '36px', fontWeight: 700, marginBottom: '8px' }}>{stats.orders}</div>
+          <div style={{ fontSize: '15px', opacity: 0.9, fontWeight: 500 }}>{L('Purchase Orders','ใบสั่งซื้อ')}</div>
         </div>
 
-        <div className={styles.statCard}>
-          <div className={`${styles.statIcon} ${styles.statIconGreen}`}>
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-              <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/>
-            </svg>
+        <div style={{
+          background: 'linear-gradient(135deg, #10b981, #059669)',
+          borderRadius: '16px',
+          padding: '24px',
+          color: 'white',
+          boxShadow: '0 8px 24px rgba(16, 185, 129, 0.3)',
+          transition: 'transform 0.3s ease',
+          cursor: 'pointer'
+        }}
+        onMouseEnter={(e) => e.currentTarget.style.transform = 'translateY(-4px)'}
+        onMouseLeave={(e) => e.currentTarget.style.transform = 'translateY(0)'}
+        onClick={() => router.push('/Thailand/Admin-Login/customers/list')}>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '16px' }}>
+            <div style={{
+              width: 56,
+              height: 56,
+              borderRadius: '12px',
+              background: 'rgba(255,255,255,0.2)',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center'
+            }}>
+              <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/>
+              </svg>
+            </div>
           </div>
-          <div className={styles.statContent}>
-            <div className={styles.statValue}>{stats.customers}</div>
-            <div className={styles.statLabel}>{L('Customers','ลูกค้า')}</div>
-          </div>
+          <div style={{ fontSize: '36px', fontWeight: 700, marginBottom: '8px' }}>{stats.customers}</div>
+          <div style={{ fontSize: '15px', opacity: 0.9, fontWeight: 500 }}>{L('Customers','ลูกค้า')}</div>
         </div>
 
-        <div className={styles.statCard}>
-          <div className={`${styles.statIcon} ${styles.statIconOrange}`}>
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-              <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/>
-            </svg>
+        <div style={{
+          background: 'linear-gradient(135deg, #f59e0b, #d97706)',
+          borderRadius: '16px',
+          padding: '24px',
+          color: 'white',
+          boxShadow: '0 8px 24px rgba(245, 158, 11, 0.3)',
+          transition: 'transform 0.3s ease',
+          cursor: 'pointer'
+        }}
+        onMouseEnter={(e) => e.currentTarget.style.transform = 'translateY(-4px)'}
+        onMouseLeave={(e) => e.currentTarget.style.transform = 'translateY(0)'}
+        onClick={() => router.push('/Thailand/Admin-Login/products/list')}>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '16px' }}>
+            <div style={{
+              width: 56,
+              height: 56,
+              borderRadius: '12px',
+              background: 'rgba(255,255,255,0.2)',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center'
+            }}>
+              <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/>
+              </svg>
+            </div>
           </div>
-          <div className={styles.statContent}>
-            <div className={styles.statValue}>{stats.products}</div>
-            <div className={styles.statLabel}>{L('Products','สินค้า')}</div>
-          </div>
+          <div style={{ fontSize: '36px', fontWeight: 700, marginBottom: '8px' }}>{stats.products}</div>
+          <div style={{ fontSize: '15px', opacity: 0.9, fontWeight: 500 }}>{L('Products','สินค้า')}</div>
         </div>
 
-        <div className={styles.statCard}>
-          <div className={`${styles.statIcon} ${styles.statIconPurple}`}>
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-              <rect x="1" y="4" width="22" height="16" rx="2" ry="2"/><line x1="1" y1="10" x2="23" y2="10"/>
-            </svg>
+        <div style={{
+          background: 'linear-gradient(135deg, #8b5cf6, #7c3aed)',
+          borderRadius: '16px',
+          padding: '24px',
+          color: 'white',
+          boxShadow: '0 8px 24px rgba(139, 92, 246, 0.3)',
+          transition: 'transform 0.3s ease',
+          cursor: 'pointer'
+        }}
+        onMouseEnter={(e) => e.currentTarget.style.transform = 'translateY(-4px)'}
+        onMouseLeave={(e) => e.currentTarget.style.transform = 'translateY(0)'}
+        onClick={() => router.push('/Thailand/Admin-Login/invoice/list')}>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '16px' }}>
+            <div style={{
+              width: 56,
+              height: 56,
+              borderRadius: '12px',
+              background: 'rgba(255,255,255,0.2)',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center'
+            }}>
+              <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <rect x="1" y="4" width="22" height="16" rx="2" ry="2"/><line x1="1" y1="10" x2="23" y2="10"/>
+              </svg>
+            </div>
           </div>
-          <div className={styles.statContent}>
-            <div className={styles.statValue}>{stats.invoices}</div>
-            <div className={styles.statLabel}>{L('Invoices','ใบแจ้งหนี้')}</div>
-          </div>
-        </div>
-        
-        <div className={styles.statCard}>
-          <div className={`${styles.statIcon} ${styles.statIconTeal}`}>
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-              <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/>
-            </svg>
-          </div>
-          <div className={styles.statContent}>
-            <div className={styles.statValue}>{stats.contracts}</div>
-            <div className={styles.statLabel}>{L('Contracts','สัญญา')}</div>
-          </div>
-        </div>
-
-        <div className={styles.statCard}>
-          <div className={`${styles.statIcon} ${styles.statIconYellow}`}>
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-              <path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/><polyline points="22 4 12 14 9 11"/>
-            </svg>
-          </div>
-          <div className={styles.statContent}>
-            <div className={styles.statValue}>{stats.followUps}</div>
-            <div className={styles.statLabel}>{L('Follow Ups','ติดตามงาน')}</div>
-          </div>
+          <div style={{ fontSize: '36px', fontWeight: 700, marginBottom: '8px' }}>{stats.invoices}</div>
+          <div style={{ fontSize: '15px', opacity: 0.9, fontWeight: 500 }}>{L('Invoices','ใบแจ้งหนี้')}</div>
         </div>
 
-        <div className={styles.statCard}>
-          <div className={`${styles.statIcon} ${styles.statIconCyan}`}>
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-              <rect x="1" y="3" width="15" height="13"/><polygon points="16 8 20 8 23 11 23 16 16 16 16 8"/>
-            </svg>
+        <div style={{
+          background: 'linear-gradient(135deg, #06b6d4, #0891b2)',
+          borderRadius: '16px',
+          padding: '24px',
+          color: 'white',
+          boxShadow: '0 8px 24px rgba(6, 182, 212, 0.3)',
+          transition: 'transform 0.3s ease',
+          cursor: 'pointer'
+        }}
+        onMouseEnter={(e) => e.currentTarget.style.transform = 'translateY(-4px)'}
+        onMouseLeave={(e) => e.currentTarget.style.transform = 'translateY(0)'}
+        onClick={() => router.push('/Thailand/Admin-Login/contract/list')}>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '16px' }}>
+            <div style={{
+              width: 56,
+              height: 56,
+              borderRadius: '12px',
+              background: 'rgba(255,255,255,0.2)',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center'
+            }}>
+              <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/>
+              </svg>
+            </div>
           </div>
-          <div className={styles.statContent}>
-            <div className={styles.statValue}>{stats.preInstallations}</div>
-            <div className={styles.statLabel}>{L('Pre-Installation','ก่อนติดตั้ง')}</div>
-          </div>
+          <div style={{ fontSize: '36px', fontWeight: 700, marginBottom: '8px' }}>{stats.contracts}</div>
+          <div style={{ fontSize: '15px', opacity: 0.9, fontWeight: 500 }}>{L('Contracts','สัญญา')}</div>
         </div>
 
-        <div className={styles.statCard}>
-          <div className={`${styles.statIcon} ${styles.statIconIndigo}`}>
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-              <polyline points="9 11 12 14 22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/>
-            </svg>
+        <div style={{
+          background: 'linear-gradient(135deg, #eab308, #ca8a04)',
+          borderRadius: '16px',
+          padding: '24px',
+          color: 'white',
+          boxShadow: '0 8px 24px rgba(234, 179, 8, 0.3)',
+          transition: 'transform 0.3s ease',
+          cursor: 'pointer'
+        }}
+        onMouseEnter={(e) => e.currentTarget.style.transform = 'translateY(-4px)'}
+        onMouseLeave={(e) => e.currentTarget.style.transform = 'translateY(0)'}
+        onClick={() => router.push('/Thailand/Admin-Login/follow-up/list')}>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '16px' }}>
+            <div style={{
+              width: 56,
+              height: 56,
+              borderRadius: '12px',
+              background: 'rgba(255,255,255,0.2)',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center'
+            }}>
+              <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/><polyline points="22 4 12 14 9 11"/>
+              </svg>
+            </div>
           </div>
-          <div className={styles.statContent}>
-            <div className={styles.statValue}>{stats.salesOrders}</div>
-            <div className={styles.statLabel}>{L('Sales Orders','ใบสั่งขาย')}</div>
+          <div style={{ fontSize: '36px', fontWeight: 700, marginBottom: '8px' }}>{stats.followUps}</div>
+          <div style={{ fontSize: '15px', opacity: 0.9, fontWeight: 500 }}>{L('Follow Ups','ติดตามงาน')}</div>
+        </div>
+
+        <div style={{
+          background: 'linear-gradient(135deg, #14b8a6, #0d9488)',
+          borderRadius: '16px',
+          padding: '24px',
+          color: 'white',
+          boxShadow: '0 8px 24px rgba(20, 184, 166, 0.3)',
+          transition: 'transform 0.3s ease',
+          cursor: 'pointer'
+        }}
+        onMouseEnter={(e) => e.currentTarget.style.transform = 'translateY(-4px)'}
+        onMouseLeave={(e) => e.currentTarget.style.transform = 'translateY(0)'}
+        onClick={() => router.push('/Thailand/Admin-Login/pre-installation/list')}>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '16px' }}>
+            <div style={{
+              width: 56,
+              height: 56,
+              borderRadius: '12px',
+              background: 'rgba(255,255,255,0.2)',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center'
+            }}>
+              <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <rect x="1" y="3" width="15" height="13"/><polygon points="16 8 20 8 23 11 23 16 16 16 16 8"/>
+              </svg>
+            </div>
           </div>
+          <div style={{ fontSize: '36px', fontWeight: 700, marginBottom: '8px' }}>{stats.preInstallations}</div>
+          <div style={{ fontSize: '15px', opacity: 0.9, fontWeight: 500 }}>{L('Pre-Installation','ก่อนติดตั้ง')}</div>
+        </div>
+
+        <div style={{
+          background: 'linear-gradient(135deg, #6366f1, #4f46e5)',
+          borderRadius: '16px',
+          padding: '24px',
+          color: 'white',
+          boxShadow: '0 8px 24px rgba(99, 102, 241, 0.3)',
+          transition: 'transform 0.3s ease',
+          cursor: 'pointer'
+        }}
+        onMouseEnter={(e) => e.currentTarget.style.transform = 'translateY(-4px)'}
+        onMouseLeave={(e) => e.currentTarget.style.transform = 'translateY(0)'}
+        onClick={() => router.push('/Thailand/Admin-Login/sales-order/list')}>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '16px' }}>
+            <div style={{
+              width: 56,
+              height: 56,
+              borderRadius: '12px',
+              background: 'rgba(255,255,255,0.2)',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center'
+            }}>
+              <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/>
+              </svg>
+            </div>
+          </div>
+          <div style={{ fontSize: '36px', fontWeight: 700, marginBottom: '8px' }}>{stats.salesOrders}</div>
+          <div style={{ fontSize: '15px', opacity: 0.9, fontWeight: 500 }}>{L('Sales Orders','ใบสั่งขาย')}</div>
         </div>
       </div>
       
 
       {/* Quick Actions */}
-      <div className={styles.contentCard} style={{ marginBottom: '24px' }}>
-        <div className={styles.cardHeader}>
-          <h2 className={styles.cardTitle}>
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+      <div style={{
+        background: 'rgba(255,255,255,0.95)',
+        backdropFilter: 'blur(10px)',
+        borderRadius: '20px',
+        padding: '28px',
+        boxShadow: '0 8px 32px rgba(0,0,0,0.08)',
+        marginBottom: '32px'
+      }}>
+        <div style={{ marginBottom: '24px' }}>
+          <h2 style={{
+            fontSize: '24px',
+            fontWeight: 700,
+            background: 'linear-gradient(135deg, #667eea, #764ba2)',
+            WebkitBackgroundClip: 'text',
+            WebkitTextFillColor: 'transparent',
+            marginBottom: '8px',
+            display: 'flex',
+            alignItems: 'center',
+            gap: 12
+          }}>
+            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="url(#grad1)" strokeWidth="2">
+              <defs>
+                <linearGradient id="grad1" x1="0%" y1="0%" x2="100%" y2="100%">
+                  <stop offset="0%" stopColor="#667eea" />
+                  <stop offset="100%" stopColor="#764ba2" />
+                </linearGradient>
+              </defs>
               <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/>
             </svg>
             {L('Quick Actions','เมนูด่วน')}
           </h2>
-          <p className={styles.cardSubtitle}>{L('Quick access to common functions','เข้าถึงฟังก์ชันที่ใช้บ่อย')}</p>
+          <p style={{ fontSize: '15px', color: '#64748b', margin: 0 }}>
+            {L('Quick access to common functions','เข้าถึงฟังก์ชันที่ใช้บ่อย')}
+          </p>
         </div>
-        <div className={styles.cardBody}>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(5, 1fr)', gap: '16px' }}>
-            {quickActions.map((action, idx) => (
-              <div
-                key={idx}
-                onClick={() => router.push(action.href)}
-                style={{
-                    padding: '12px',
-                    height: '160px',
-                    boxSizing: 'border-box',
-                    border: '1px solid #e5e5e5',
-                    borderRadius: '8px',
-                    cursor: 'pointer',
-                    transition: 'all 0.2s ease',
-                    background: 'white',
-                    display: 'flex',
-                    flexDirection: 'column',
-                    justifyContent: 'center',
-                    alignItems: 'flex-start'
-                }}
-                onMouseEnter={(e) => {
-                  e.currentTarget.style.borderColor = action.color
-                  e.currentTarget.style.boxShadow = `0 4px 12px ${action.color}20`
-                  e.currentTarget.style.transform = 'translateY(-2px)'
-                }}
-                onMouseLeave={(e) => {
-                  e.currentTarget.style.borderColor = '#e5e5e5'
-                  e.currentTarget.style.boxShadow = 'none'
-                  e.currentTarget.style.transform = 'translateY(0)'
-                }}
-              >
-                <div style={{ color: action.color, marginBottom: '12px' }}>
-                  {action.icon}
-                </div>
-                <div style={{ fontWeight: 600, color: '#1e293b', marginBottom: '4px' }}>
-                  {lang === 'th' ? action.titleTh : action.title}
-                </div>
-                <div style={{ fontSize: '13px', color: '#666666' }}>
-                  {lang === 'th' ? action.descTh : action.desc}
-                </div>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))', gap: '16px' }}>
+          {quickActions.map((action, idx) => (
+            <div
+              key={idx}
+              onClick={() => router.push(action.href)}
+              style={{
+                padding: '20px',
+                background: 'linear-gradient(135deg, #ffffff, #f8fafc)',
+                border: '2px solid #e2e8f0',
+                borderRadius: '16px',
+                cursor: 'pointer',
+                transition: 'all 0.3s ease',
+                display: 'flex',
+                flexDirection: 'column',
+                alignItems: 'flex-start',
+                position: 'relative',
+                overflow: 'hidden'
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.borderColor = action.color
+                e.currentTarget.style.boxShadow = `0 8px 24px ${action.color}30`
+                e.currentTarget.style.transform = 'translateY(-4px)'
+                e.currentTarget.style.background = `linear-gradient(135deg, ${action.color}10, #ffffff)`
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.borderColor = '#e2e8f0'
+                e.currentTarget.style.boxShadow = 'none'
+                e.currentTarget.style.transform = 'translateY(0)'
+                e.currentTarget.style.background = 'linear-gradient(135deg, #ffffff, #f8fafc)'
+              }}
+            >
+              <div style={{
+                width: 48,
+                height: 48,
+                borderRadius: '12px',
+                background: `${action.color}15`,
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                marginBottom: '16px',
+                color: action.color
+              }}>
+                {action.icon}
               </div>
-            ))}
-          </div>
+              <div style={{ fontWeight: 700, fontSize: '16px', color: '#1e293b', marginBottom: '6px' }}>
+                {lang === 'th' ? action.titleTh : action.title}
+              </div>
+              <div style={{ fontSize: '13px', color: '#64748b', lineHeight: 1.5 }}>
+                {lang === 'th' ? action.descTh : action.desc}
+              </div>
+            </div>
+          ))}
         </div>
       </div>
 
         
 
       {/* Recent Activity */}
-      <div className={styles.contentCard}>
-        <div className={styles.cardHeader}>
-          <h2 className={styles.cardTitle}>
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+      <div style={{
+        background: 'rgba(255,255,255,0.95)',
+        backdropFilter: 'blur(10px)',
+        borderRadius: '20px',
+        padding: '28px',
+        boxShadow: '0 8px 32px rgba(0,0,0,0.08)'
+      }}>
+        <div style={{ marginBottom: '24px' }}>
+          <h2 style={{
+            fontSize: '24px',
+            fontWeight: 700,
+            background: 'linear-gradient(135deg, #667eea, #764ba2)',
+            WebkitBackgroundClip: 'text',
+            WebkitTextFillColor: 'transparent',
+            marginBottom: '8px',
+            display: 'flex',
+            alignItems: 'center',
+            gap: 12
+          }}>
+            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="url(#grad2)" strokeWidth="2">
+              <defs>
+                <linearGradient id="grad2" x1="0%" y1="0%" x2="100%" y2="100%">
+                  <stop offset="0%" stopColor="#667eea" />
+                  <stop offset="100%" stopColor="#764ba2" />
+                </linearGradient>
+              </defs>
               <circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>
             </svg>
             {L('Recent Activity','กิจกรรมล่าสุด')}
           </h2>
+          <p style={{ fontSize: '15px', color: '#64748b', margin: 0 }}>
+            {L('Real-time updates from your system','อัพเดตแบบเรียลไทม์จากระบบของคุณ')}
+          </p>
         </div>
-        <div className={styles.cardBody} style={{ padding: 0 }}>
-          <table className={styles.table}>
-            <thead>
-                <tr>
-                  <th style={{ width: '60%' }}>{L('Details','รายละเอียด')}</th>
-                  <th style={{ width: '20%' }}>{L('Type','ประเภท')}</th>
-                  <th style={{ width: '20%' }}>{L('Time','เวลา')}</th>
-                </tr>
+        <div style={{
+          background: '#fff',
+          borderRadius: '12px',
+          border: '2px solid #e2e8f0',
+          overflow: 'hidden'
+        }}>
+          <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+            <thead style={{ background: 'linear-gradient(135deg, #f8fafc, #f1f5f9)' }}>
+              <tr>
+                <th style={{
+                  width: '60%',
+                  padding: '16px',
+                  textAlign: 'left',
+                  fontSize: '14px',
+                  fontWeight: 700,
+                  color: '#1e293b',
+                  borderBottom: '2px solid #e2e8f0'
+                }}>
+                  {L('Details','รายละเอียด')}
+                </th>
+                <th style={{
+                  width: '20%',
+                  padding: '16px',
+                  textAlign: 'left',
+                  fontSize: '14px',
+                  fontWeight: 700,
+                  color: '#1e293b',
+                  borderBottom: '2px solid #e2e8f0'
+                }}>
+                  {L('Type','ประเภท')}
+                </th>
+                <th style={{
+                  width: '20%',
+                  padding: '16px',
+                  textAlign: 'left',
+                  fontSize: '14px',
+                  fontWeight: 700,
+                  color: '#1e293b',
+                  borderBottom: '2px solid #e2e8f0'
+                }}>
+                  {L('Time','เวลา')}
+                </th>
+              </tr>
             </thead>
             <tbody>
-              {activities.map((activity, idx) => (
-                <tr key={idx}>
-                  <td>{lang === 'th' ? activity.descTh || activity.descEn : activity.descEn || activity.descTh}</td>
-                  <td>
-                    <span className={`${styles.badge} ${
-                      activity.type === 'order' ? styles.badgeInfo :
-                      activity.type === 'customer' ? styles.badgeSuccess :
-                      activity.type === 'invoice' ? styles.badgeWarning :
-                      styles.badgePending
-                    }`}>
-                      {activity.type === 'order' ? L('Order','ใบสั่งซื้อ') :
-                       activity.type === 'customer' ? L('Customer','ลูกค้า') :
-                       activity.type === 'invoice' ? L('Invoice','ใบแจ้งหนี้') :
-                       L('Payment','ชำระเงิน')}
-                    </span>
+              {activities.length === 0 ? (
+                <tr>
+                  <td colSpan={3} style={{
+                    padding: '40px',
+                    textAlign: 'center',
+                    color: '#94a3b8',
+                    fontSize: '15px'
+                  }}>
+                    {L('No recent activity','ไม่มีกิจกรรมล่าสุด')}
                   </td>
-                  <td style={{ color: '#666666' }}>{activity.time}</td>
                 </tr>
-              ))}
+              ) : (
+                activities.map((activity, idx) => (
+                  <tr key={idx} style={{
+                    background: idx % 2 === 0 ? '#ffffff' : '#f8fafc',
+                    transition: 'background 0.2s ease'
+                  }}
+                  onMouseEnter={(e) => e.currentTarget.style.background = '#f1f5f9'}
+                  onMouseLeave={(e) => e.currentTarget.style.background = idx % 2 === 0 ? '#ffffff' : '#f8fafc'}>
+                    <td style={{
+                      padding: '14px 16px',
+                      fontSize: '14px',
+                      color: '#334155',
+                      borderBottom: '1px solid #e2e8f0'
+                    }}>
+                      {lang === 'th' ? activity.descTh || activity.descEn : activity.descEn || activity.descTh}
+                    </td>
+                    <td style={{
+                      padding: '14px 16px',
+                      borderBottom: '1px solid #e2e8f0'
+                    }}>
+                      <span style={{
+                        display: 'inline-block',
+                        padding: '4px 12px',
+                        borderRadius: '8px',
+                        fontSize: '13px',
+                        fontWeight: 600,
+                        background: activity.type === 'order' ? '#dbeafe' :
+                                   activity.type === 'customer' ? '#d1fae5' :
+                                   activity.type === 'invoice' ? '#fef3c7' :
+                                   '#f3e8ff',
+                        color: activity.type === 'order' ? '#1e40af' :
+                               activity.type === 'customer' ? '#065f46' :
+                               activity.type === 'invoice' ? '#92400e' :
+                               '#6b21a8'
+                      }}>
+                        {activity.type === 'order' ? L('Order','ใบสั่งซื้อ') :
+                         activity.type === 'customer' ? L('Customer','ลูกค้า') :
+                         activity.type === 'invoice' ? L('Invoice','ใบแจ้งหนี้') :
+                         L('Payment','ชำระเงิน')}
+                      </span>
+                    </td>
+                    <td style={{
+                      padding: '14px 16px',
+                      fontSize: '13px',
+                      color: '#64748b',
+                      borderBottom: '1px solid #e2e8f0'
+                    }}>
+                      {activity.time}
+                    </td>
+                  </tr>
+                ))
+              )}
             </tbody>
           </table>
         </div>

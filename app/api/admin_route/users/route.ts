@@ -6,7 +6,7 @@ export const maxDuration = 10
 
 /**
  * GET /api/admin_route/users
- * Retrieve all users from PostgreSQL
+ * Retrieve all users from user_list table
  */
 export async function GET(req: Request) {
   try {
@@ -15,14 +15,14 @@ export async function GET(req: Request) {
     const offset = parseInt(url.searchParams.get('offset') || '0')
 
     const users = await query(`
-      SELECT "userID", "userName", "userPassword", "userFULLNAME"
-      FROM users
-      ORDER BY "userID" ASC
-      LIMIT $1 OFFSET $2
+      SELECT userId, userName, password, name, email, site, typeID, create_datetime, create_by
+      FROM user_list
+      ORDER BY userId ASC
+      LIMIT ? OFFSET ?
     `, [limit, offset])
 
-    const total = await query(`SELECT COUNT(*) as count FROM users`)
-    const totalCount = total[0]?.count || 0
+    const total = await query(`SELECT COUNT(*) as count FROM user_list`)
+    const totalCount = (total as any[])[0]?.count || 0
 
     return NextResponse.json({
       ok: true,
@@ -42,14 +42,14 @@ export async function GET(req: Request) {
 
 /**
  * PUT /api/admin_route/users?id=xxx
- * Update a user by userID
+ * Update a user by userId
  */
 export async function PUT(req: Request) {
   try {
     const url = new URL(req.url)
-    const userID = url.searchParams.get('id')
+    const userId = url.searchParams.get('id')
 
-    if (!userID) {
+    if (!userId) {
       return NextResponse.json({
         ok: false,
         error: 'id parameter is required'
@@ -57,7 +57,7 @@ export async function PUT(req: Request) {
     }
 
     const body = await req.json().catch(() => ({}))
-    const { userName, userPassword, userFULLNAME } = body
+    const { userName, password, name, email, site, typeID } = body
 
     if (!userName) {
       return NextResponse.json({
@@ -66,14 +66,22 @@ export async function PUT(req: Request) {
       }, { status: 400 })
     }
 
+    await query(`
+      UPDATE user_list SET
+        userName = ?,
+        password = ?,
+        name = ?,
+        email = ?,
+        site = ?,
+        typeID = ?
+      WHERE userId = ?
+    `, [userName, password || null, name || null, email || null, site || null, typeID || null, parseInt(userId)])
+
+    // Fetch updated user
     const result = await query(`
-      UPDATE users SET
-        "userName" = $1,
-        "userPassword" = $2,
-        "userFULLNAME" = $3
-      WHERE "userID" = $4
-      RETURNING "userID", "userName", "userPassword", "userFULLNAME"
-    `, [userName, userPassword || null, userFULLNAME || null, parseInt(userID)])
+      SELECT userId, userName, name, email, site, typeID
+      FROM user_list WHERE userId = ?
+    `, [parseInt(userId)]) as any[]
 
     if (result.length === 0) {
       return NextResponse.json({
@@ -99,36 +107,37 @@ export async function PUT(req: Request) {
 
 /**
  * DELETE /api/admin_route/users?id=xxx
- * Delete a user by userID
+ * Delete a user by userId
  */
 export async function DELETE(req: Request) {
   try {
     const url = new URL(req.url)
-    const userID = url.searchParams.get('id')
+    const userId = url.searchParams.get('id')
 
-    if (!userID) {
+    if (!userId) {
       return NextResponse.json({
         ok: false,
         error: 'id parameter is required'
       }, { status: 400 })
     }
 
-    const result = await query(`
-      DELETE FROM users
-      WHERE "userID" = $1
-      RETURNING "userID", "userName"
-    `, [parseInt(userID)])
+    // Get user before delete
+    const userBefore = await query(`
+      SELECT userId, userName FROM user_list WHERE userId = ?
+    `, [parseInt(userId)]) as any[]
 
-    if (result.length === 0) {
+    if (userBefore.length === 0) {
       return NextResponse.json({
         ok: false,
         error: 'User not found'
       }, { status: 404 })
     }
 
+    await query(`DELETE FROM user_list WHERE userId = ?`, [parseInt(userId)])
+
     return NextResponse.json({
       ok: true,
-      deleted: result[0],
+      deleted: userBefore[0],
       message: 'User deleted successfully'
     })
 
