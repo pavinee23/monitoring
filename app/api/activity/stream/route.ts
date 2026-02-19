@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server'
 import { pool } from '@/lib/mysql'
 
 export const runtime = 'nodejs'
+export const dynamic = 'force-dynamic'
 
 function formatRow(r: any) {
   return {
