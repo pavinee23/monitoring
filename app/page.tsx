@@ -225,7 +225,7 @@ export default function HomePage() {
 								{t.heroTagline[lang]}
 							</p>
 							<div className="d-flex gap-3 justify-content-center flex-wrap">
-								<a href="https://ksave-monitoring.com/main-login" className="btn-custom-primary">
+								<a href="https://ksavemonitoring.com/main-login" className="btn-custom-primary">
 									{t.loginBtn[lang]}
 								</a>
 								<a href="#products" className="btn-custom-secondary">
